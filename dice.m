@@ -6,8 +6,8 @@ nc = size(M,2);
 D = zeros(nc);
 for i = 1:nc
     for j = (i+1):nc
-        Mi = M(i,:);
-        Mj = M(j,:);
+        Mi = M(:,i);
+        Mj = M(:,j);
         D(i,j) = sum(Mi&Mj)/(sum(Mi)+sum(Mj));        
     end
 end

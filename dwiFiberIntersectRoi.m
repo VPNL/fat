@@ -66,6 +66,7 @@ for s = 1:nSubj
                         fc((k-1)*2+1,:) = fg(j).fibers{k}(:,1);
                         fc((k-1)*2+2,:) = fg(j).fibers{k}(:,end);
                     end
+                    
                     % distance betwee a fg and a roi
                     D = reshape(pdist2(fc,rc),2,nfiber,nvox);
                     D = permute(D,[2,3,1])< dist;

@@ -1,5 +1,6 @@
 function D = dwiFiberOverlap(dwiDir, sessid,runName, fgName, roiName, foi,radius)
-
+%  D = dwiFiberOverlap(dwiDir, sessid,runName, fgName, roiName, foi,radius)
+%  
 nRoi = length(roiName);
 nFg = length(foi);
 hemisphere = {'lh','rh'};
@@ -13,9 +14,11 @@ for s = 1:nSubj
             sessid{s}, runName{r}, fgName);
         runDir = fullfile(dwiDir,sessid{s},runName{r},'dti96trilin');
         afqDir = fullfile(runDir,'fibers','afq');
+        
         for h = 1:nHemi
             idx = false(nRoi,1);
             roifg = cell(nFg,nRoi);
+            
             for i = 1:nRoi
                 roifgFile = fullfile(afqDir,sprintf('%s_%s_fROI_r%.2f_%s',hemisphere{h},roiName{i},radius,fgName));
                 if exist(roifgFile, 'file')
@@ -24,7 +27,7 @@ for s = 1:nSubj
                     roifg(:,i)= fidx(foi);
                 end
             end
-                       
+            
             for f = 1:nFg
                 % extract fiber index from a fg
                 M = cat(2,roifg{f,:});

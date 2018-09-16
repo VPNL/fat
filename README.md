@@ -1,4 +1,7 @@
-﻿Diffusion tool box that combines Vistasoft, MRtrix, LiFE and AFQ  to produce functional defined white matter tracts. It requires the toolboxes mentioned before to be installed, and also requires fROIs defined using vistasoft. The pipeline is orgnized as bellow.
+﻿Diffusion tool box that combines Vistasoft, MRtrix, LiFE and AFQ  to produce functional defined white matter tracts. It requires the toolboxes mentioned before to be installed, and also requires fROIs defined using vistasoft. The pipeline is orgnized as below. 
+ 
+A great place to start exploring this pipeline is the script "fat/preprocessing/scripts/fatPreprocEtWrapper.m", which was used to automatically process the data presented in the mrLanes manuscript.
+
 
 1) Prepare fat data and directory structure
 fatPrepare(fatDir, sessid);

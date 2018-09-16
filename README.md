@@ -10,7 +10,7 @@ fatPreprocess(fatDir,sessid,runName,force)
 fatMakeWMmask(fatDir, sessid, 'wm', force)
 
 5) Run MRtrix to create candidate connectomes with different parameters
-fatCreateConnectome(fatDir, sessid, runName);
+fatCreateEtConnectome(fatDir, sessid, runName);
 
 6) Concatenate candidate connectomes to construct the final ET connectome
 fatConcateFg(fatDir, sessid, runName(i), fgInName,fgOutName);

@@ -1,9 +1,8 @@
-function fatSegmentConnectomeMRtrix3(fatDir, anatDir, anatid, sessid, runName, fgName, computeRoi, rmOutlier)
+function fgFile=fatSegmentConnectomeMRtrix3(fatDir, anatDir, anatid, sessid, runName, fgName, computeRoi)
 % fatSegmentConnectome(fatDir, sessid, runName, fgName)
 % fgName: full name of fg including path and postfix
 % foi, a vector to indicate fiber of interest
 % This function will run AFQ on a % given list of subjects and runs.
-if nargin < 8, rmOutlier = false; end
 if nargin < 7, computeRoi = true; end
 if nargin < 6, fgName = 'lmax_curv1_post_life_et_it500.mat'; end
 
@@ -25,7 +24,7 @@ end
         %% Load and plot whole brain fiber
         % Load ensemble connectome
         wholeBrainfgFile = fullfile(fatDir,sessid,runName,...
-            'dti96trilin','fibers',fgName);
+            'dti96trilin','fibers',strcat(fgNameWoExt, '.mat'));
         
         wholebrainFG = fgRead(wholeBrainfgFile);
         %% classified the fibers
@@ -123,21 +122,5 @@ end
         save(fgFile,'-struct','S');
         clear S;
         
-        
-        %% Identify and remove abherrant fibers.
-        if rmOutlier
-            maxDist = 4; maxLen = 4; numNodes = 100; M = 'mean'; maxIter = 1; count = true;
-            for ii = 1:length(fg_classified)
-                fg_clean(ii) = AFQ_removeFiberOutliers(fg_classified(ii),...
-                    maxDist,maxLen,numNodes,M,count,maxIter);
-            end
-            clear fg_classified
-            
-            % save file
-            pName = sprintf('_classified_clean_D%dL%dN%dI%d.mat',...
-                maxDist,maxLen,numNodes,maxIter);
-            fgFile = fullfile(afqDir, [fgNameWoExt, pName]);
-            S.fg =  fg_clean;
-            save(fgFile,'-struct','S')
 end
 

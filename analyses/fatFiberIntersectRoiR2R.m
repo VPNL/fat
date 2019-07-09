@@ -1,4 +1,4 @@
-function  [fiberCount, voxCount, totalFiber,totalVoxel] = fatFiberIntersectRoi(fatDir,fgDir, sessid, ...
+function  [fiberCount, voxCount, totalFiber,totalVoxel] = fatFiberIntersectRoiR2R(fatDir,fgDir, sessid, ...
     runName, fgName, roiName, foi, radius)
 % fatFiberIntersectRoi(fatDir, sessid, runName, fgName, roiName, foi, radius)
 % roiName, cell array
@@ -6,8 +6,9 @@ function  [fiberCount, voxCount, totalFiber,totalVoxel] = fatFiberIntersectRoi(f
 % radius, scalar
 % fgName should be specified according to the afq dir 
 
-if nargin < 8, radius = 5; end
-minLength = 20;
+if nargin < 8, radius = 10000000; end
+minLength = 2;
+radius=1;
 
 nRoi = length(roiName);
 nFg = length(foi);
@@ -87,7 +88,7 @@ voxCount = fiberCount;
                 % save the fiber group intersecting with roi
                 [~,roiNameWoExt] = fileparts(roiName{i});
                 roifgFile = fullfile(runDir,'fibers/afq',...
-                    sprintf('%s_r%.2f_%s.mat',roiNameWoExt,radius,fgNameWoExt));
+                    sprintf('%s_inter.mat',fgNameWoExt));
                 save(roifgFile, 'roifg','fidx');
                 clear roifg fidx;            
              end

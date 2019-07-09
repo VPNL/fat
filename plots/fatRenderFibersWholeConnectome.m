@@ -1,9 +1,11 @@
-function  fatRenderFibersWholeConnectome(fatDir, sessid, runName, fgName,foi,t1name,hemi)
+function  fatRenderFibersWholeConnectome(fatDir, sessid, runName, fgName,foi,t1name,hemi,colorMap)
 %  fatRenderFibers(fatDir, sessid, runName, fgName, hemi)
 % fgName: full name of fg including path and postfix
 % foi, a vector to indicate fiber of interest
 % hemi, 'rh' or 'lh'
-if nargin < 7, hemi = 'lh'; end
+if nargin < 8 
+    colorMap = [0 0.8 0.8; 1 0.5 1; 0.45 0 0.45; 1 0 0; 1 0.6 0; 0.6 1 0.05]; 
+end
 
 [~,fName] = fileparts(fgName);
 
@@ -11,17 +13,18 @@ if strcmp(hemi,'lh')
     cameraView = [-60,10];
     xplane =  [-15, 0, 0];
 else strcmp(hemi,'rh')
-    cameraView = [60,10];
+    cameraView = 'rightsag';
     xplane =  [15,0,0];
 end
 zplane = [0, 0, -10];
+ 
 
 
 % colorMap  = linspecer(length(foi));
 % colorMap= jet(length(foi));
 
 % set criteria
-maxDist = 2.5;maxLen = 2;numNodes = 30;M = 'mean';maxIter = 1;count = false;
+maxDist = 2.5;maxLen = 2;numNodes = 100;M = 'mean';maxIter = 1;count = false;
 numfibers = 75;
         fprintf('Plot fiber %s-%s:%s\n',sessid,runName,fgName);
         runDir = fullfile(fatDir,sessid,runName,'dti96trilin');
@@ -39,11 +42,9 @@ numfibers = 75;
             fg = fg(foi);
             else
             fg = bothfg(foi); 
- colorMap = [0.6,0.2,0.2; 1 0 1; 0 0 0; 0 0 1; 0 0 0.5; 0.5 0.5 1; 0.9 0.9 0.9; 0 0.8 0.8; 1 0.5 1; 0.45 0 0.45; 1 0 0; 1 0.6 0; 0.6 1 0.05];   
-    
+ 
             end
-                       
-            for i = 1:length(foi)
+                          for i = 1:length(foi)
                 fg(i) = AFQ_removeFiberOutliers(fg(i),maxDist,maxLen,numNodes,M,count,maxIter);
             end
             
@@ -66,11 +67,10 @@ numfibers = 75;
             AFQ_AddImageTo3dPlot(b0,xplane);
             axis off
             axis square
-            clear fg fg
+            clear fg roifg
             
        %     print('-depsc',fullfile(imgDir,sprintf('%s.eps',fName)));
             print('-dtiff','-r300',fullfile(imgDir,sprintf('%s.tiff',fName)));
             end
-%             close all;
-        end
+           % close all;
 end

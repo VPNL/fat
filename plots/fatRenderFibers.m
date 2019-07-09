@@ -5,8 +5,11 @@ function  fatRenderFibers(fatDir, sessid, runName, fgName,foi,t1name,hemi)
 % hemi, 'rh' or 'lh'
 if nargin < 7, hemi = 'lh'; end
 
-[~,fName] = fileparts(fgName);
 
+[~,fName] = fileparts(fgName);
+%colorMap=[0.9 0.9 0.9; 1 0 1; 0 0 0; 0 0 1; 0 0 0.5; 0.5 0.5 1; 0 0.8 0.8; 1 0.5 1; 0.45 0 0.45; 0.6,0.2,0.2; 1 0 0; 1 0.6 0; 0.6 1 0.05];
+%colorMap = [0 1 0; 0 0 1]; 
+colorMap = [0 0.8 0.8; 1 0.5 1; 0.45 0 0.45; 1 0 0; 1 0.6 0; 0.6 1 0.05]; 
 if strcmp(hemi,'lh')
     cameraView = [-60,10];
     xplane =  [-15, 0, 0];
@@ -21,7 +24,7 @@ maxDist = 3;maxLen = 2;numNodes = 30;M = 'mean';maxIter = 1;count = false;
 numfibers = 100;
         fprintf('Plot fiber %s-%s:%s\n',sessid,runName,fgName);
         runDir = fullfile(fatDir,sessid,runName,'dti96trilin');
-        afqDir = fullfile(runDir, 'fibers','afq');
+        afqDir = fullfile(runDir, 'fibers/afq');
         imgDir = fullfile(afqDir,'image');
         if ~exist(imgDir,'dir')
             mkdir(imgDir);
@@ -35,7 +38,7 @@ numfibers = 100;
             fg = roifg(foi);
             else
             fg = bothfg(foi);  
-            colorMap = [0 0 1; 0 1 1; 1 0 1; 0 0 1; 0 0 1; 0 1 1];     
+colorMap = [1 0 0; 0 1 1; 1 0 1; 0 0 1; 1 1 0; 0.8 0.8 0.8];   
             end
                        
             for i = 1:length(foi)

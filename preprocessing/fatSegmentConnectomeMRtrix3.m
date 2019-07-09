@@ -1,4 +1,4 @@
-function fatSegmentConnectome(fatDir, anatDir, anatid, sessid, runName, fgName, computeRoi,rmOutlier)
+function fatSegmentConnectomeMRtrix3(fatDir, anatDir, anatid, sessid, runName, fgName, computeRoi, rmOutlier)
 % fatSegmentConnectome(fatDir, sessid, runName, fgName)
 % fgName: full name of fg including path and postfix
 % foi, a vector to indicate fiber of interest
@@ -49,9 +49,65 @@ end
                 fg_classified(22) = R_VOF;
         
         % pAF
-        fields = {'type','fiberNames','fiberIndex', 'coordspace'};
-        L_pAF = rmfield(L_pAF,fields); fg_classified(23) = L_pAF;
-        R_pAF = rmfield(R_pAF,fields); fg_classified(24) = R_pAF;
+        fields = {'coordspace'};
+        try
+            L_pAF = rmfield(L_pAF,fields);
+            R_pAF = rmfield(R_pAF,fields);
+        catch
+        end
+        
+        fields = {'type'};
+        try
+            L_pAF = rmfield(L_pAF,fields);
+            R_pAF = rmfield(R_pAF,fields);
+        catch
+        end
+        
+        fields = {'fiberNames'};
+        try
+            L_pAF = rmfield(L_pAF,fields);
+            R_pAF = rmfield(R_pAF,fields);
+        catch
+        end
+        
+        fields = {'fiberIndex'};
+        try
+            L_pAF = rmfield(L_pAF,fields);
+            R_pAF = rmfield(R_pAF,fields);
+        catch
+        end
+        
+        
+        fields = {'coordspace'};
+        try
+            L_pAF_vot = rmfield(L_pAF_vot,fields);
+            R_pAF_vot = rmfield(R_pAF_vot,fields);
+        catch
+        end
+        
+        fields = {'type'};
+        try
+            L_pAF_vot = rmfield(L_pAF_vot,fields);
+            R_pAF_vot = rmfield(R_pAF_vot,fields);
+        catch
+        end
+        
+        fields = {'fiberNames'};
+        try
+            L_pAF_vot = rmfield(L_pAF_vot,fields);
+            R_pAF_vot = rmfield(R_pAF_vot,fields);
+        catch
+        end
+        
+        fields = {'fiberIndex'};
+        try
+            L_pAF_vot = rmfield(L_pAF_vot,fields);
+            R_pAF_vot = rmfield(R_pAF_vot,fields);
+        catch
+        end
+        
+        fg_classified(23) = L_pAF;
+        fg_classified(24) = R_pAF;
         
         % pAF_vot
         fg_classified(25) = L_pAF_vot;
@@ -70,7 +126,7 @@ end
         
         %% Identify and remove abherrant fibers.
         if rmOutlier
-            maxDist = 4; maxLen = 4; numNodes = 30; M = 'mean'; maxIter = 1; count = true;
+            maxDist = 4; maxLen = 4; numNodes = 100; M = 'mean'; maxIter = 1; count = true;
             for ii = 1:length(fg_classified)
                 fg_clean(ii) = AFQ_removeFiberOutliers(fg_classified(ii),...
                     maxDist,maxLen,numNodes,M,count,maxIter);

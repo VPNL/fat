@@ -1,5 +1,5 @@
 
-function dwiPrepare(dwiDir,sessid, anatDir_system, anatDir_system_output, run)
+function dwiPrepareMRtrix3(dwiDir,sessid, anatDir_system, anatDir_system_output, run)
 
 % modify from niftisToFileBranch
 % This function will take two niftis folders and turn them into the
@@ -8,43 +8,43 @@ function dwiPrepare(dwiDir,sessid, anatDir_system, anatDir_system_output, run)
 % first two will be used for tractography and LiFE, the concatenated data
 % will be used to look at diffusion in cortex.
 
-    % Identify the two runs
-    subjDir = fullfile(dwiDir,sessid);
-    cd(subjDir{1});
-    niftis = dir('*.nii.gz'); % This assumes the niftis dti data folder hasn't been renamed
-    niftis = {niftis.name};
-    bvals = dir('*.bval*');
-    bvals = {bvals.name};
-    bvecs = dir('*.bvec*');
-    bvecs = {bvecs.name};
-    
-    % reorgnize data directory for each run
-        cd(subjDir{1});
-        % rename run dir
-        name=['96dir_run' num2str(run)]
-        mkdir(name)
-        copyfile(niftis{run}, ['96dir_run' num2str(run)]);
-        copyfile(bvals{run}, ['96dir_run' num2str(run)]);
-        copyfile(bvecs{run}, ['96dir_run' num2str(run)]);
-        cd(['96dir_run' num2str(run)])
-        
-        % make raw dir for each run
-        mkdir('raw');
-        
-        % move data to rawdir and rename them
-        nifti = dir('*.nii.gz*'); 
-        nifti = {nifti.name};
-        bval = dir('*.bval*');
-        bval = {bval.name};
-        bvec = dir('*.bvec*');
-        bvec = {bvec.name};
-        
-        movefile(nifti{1}, ['raw/run' num2str(run) '.nii.gz']);
-        movefile(bval{1}, ['raw/run' num2str(run) '.bval']);
-        movefile(bvec{1},['raw/run' num2str(run) '.bvec']);
+% Identify the two runs
+subjDir = fullfile(dwiDir,sessid);
+cd(subjDir);
+niftis = dir('*.nii.gz'); % This assumes the niftis dti data folder hasn't been renamed
+niftis = {niftis.name};
+bvals = dir('*.bval*');
+bvals = {bvals.name};
+bvecs = dir('*.bvec*');
+bvecs = {bvecs.name};
 
-%system(['ln -s ' anatDir_system  ' ' anatDir_system_output]);
-    end
+% reorgnize data directory for each run
+cd(subjDir);
+% rename run dir
+name=['96dir_run' num2str(run) '_local']
+mkdir(name)
+copyfile(niftis{run}, ['96dir_run' num2str(run) '_local']);
+copyfile(bvals{run}, ['96dir_run' num2str(run) '_local']);
+copyfile(bvecs{run}, ['96dir_run' num2str(run) '_local']);
+cd(['96dir_run' num2str(run) '_local'])
+
+% make raw dir for each run
+mkdir('raw');
+
+% move data to rawdir and rename them
+nifti = dir('*.nii.gz*');
+nifti = {nifti.name};
+bval = dir('*.bval*');
+bval = {bval.name};
+bvec = dir('*.bvec*');
+bvec = {bvec.name};
+
+movefile(nifti{1}, ['raw/run' num2str(run) '.nii.gz']);
+movefile(bval{1}, ['raw/run' num2str(run) '.bval']);
+movefile(bvec{1},['raw/run' num2str(run) '.bvec']);
+
+system(['ln -s ' anatDir_system  ' ' anatDir_system_output]);
+end
 
 
 

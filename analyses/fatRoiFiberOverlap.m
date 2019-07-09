@@ -4,7 +4,7 @@ function fiberCount = fatRoiFiberOverlap(fatDir, sessid, runName, fgName, roiNam
 % foi, vector
 % radius, scalar
 % fgName should be specified according to the afq dir
-if nargin < 7, radius = '0.00'; end
+if nargin < 7, radius = '1.00'; end
 
 nRoi = length(roiName);
 nFg = length(foi);
@@ -35,7 +35,7 @@ for s = 1:nSubj
             %% Remove overlap fibers
             for f = 1:nFg
                 % Get unique fiber for a fg
-                U = sum(reshape(cell2mat(idx(:,f)),[],length(roi)),2)>1;
+                U = sum(reshape(cell2mat(idx(:,f)),[],length(roi)),2)<2;
                 for i = 1:length(roi)
                     A = idx{i,f}; % old idx
                     B = A & U; % new non-overlaping fiber idx

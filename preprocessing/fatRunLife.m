@@ -10,15 +10,15 @@ if nargin < 6, Niter = 500; end % Number of iteration for LiFE
 % make train and test run sequence
 trainRun = runName;
 testRun = runName;
-for r = 1:length(runName)
-    if strcmp(runName{r},'96dir_run1')
-        testRun{r} = '96dir_run2';
-    elseif strcmp(runName{r},'96dir_run2')
-        testRun{r} = '96dir_run1';
-    else
-        error('Wrong runName');
-    end
-end
+% for r = 1:length(runName)
+%     if strcmp(runName{r},'96dir_run1')
+%         testRun{r} = '96dir_run2';
+%     elseif strcmp(runName{r},'96dir_run2')
+%         testRun{r} = '96dir_run1';
+%     else
+%         error('Wrong runName');
+%     end
+% end
 
 [~,fname] = fileparts(fgName);
 % if strcmp(ext, '.pdb')
@@ -61,7 +61,7 @@ for s = 1:length(sessid)
             
             % Initlize fe
             fe = feConnectomeInit(fatFile,fgFile,lifeName,...
-                saveDir,fatFileRepeat,t1File,L,[1,0]);
+                saveDir,[],t1File,L,[1,0]);
      
             % Run fe 
             fe = feSet(fe,'fit',feFitModel(feGet(fe,'model'),...

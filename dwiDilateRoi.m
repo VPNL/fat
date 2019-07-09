@@ -1,32 +1,36 @@
-function fatDilateRoi(fatDir, sessid, runName, roiName, radius)
-% fatDilateRoi(fatDir, sessid, runName, roiName, radius, meth)
+function dwiDilateRoi(dwiDir, sessid, runName, roiName, radius)
+% dwiDilateRoi(dwiDir, sessid, runName, roiName, radius, meth)
 % runName, cell array for run name
 % roiName, a str
 
-if nargin < 5, radius = 7; end
+if nargin < 5, radius = 6; end
 
+for s = 1
+    for r = 1:length(runName)
         fprintf('Dilate ROI for (%s,%s)\n',sessid,runName);
         
         % Path to run directory
-        runDir = fullfile(fatDir,sessid,runName,'dti96trilin');
-        
+        runDir = fullfile(dwiDir,sessid,runName,'dti96trilin');
+       
         % load froi
         roiFile = fullfile(runDir,'ROIs',roiName);
+      
         if exist(roiFile, 'file')
-            roi = dtiReadRoi(roiFile);
+            roi = dtiReadRoi(roiFile)
         else
-            return
+            continue
         end
-        
+   
         % dilate the ROI
         roi = dtiRoiClean(roi,radius,{'fillholes', 'dilate', 'removesat'});
-        roi.name = sprintf('%s_dilate_%d',roi.name, radius);
+        roi.name = sprintf('%s_dilate_%d_vn',roi.name, radius)
         
-        
+    
         %% Save out the ROI
-        [~,rName] = fileparts(roiName);
-        dilateRoiName = sprintf('%s_dilate_%d.mat',rName,radius);
+        [~,rName] = fileparts(roiName)
+        dilateRoiName = sprintf('%s_dilate_%d_vn.mat',rName,radius);
         
         dilateRoiFile= fullfile(runDir,'ROIs',dilateRoiName);
         dtiWriteRoi(roi,dilateRoiFile);
-
+    end
+end

@@ -1,4 +1,4 @@
-function  [fiberCount, voxCount, totalFiber,totalVoxel] = fatFiberIntersectRoi(fatDir,fgDir, sessid, ...
+function  [fiberCount, voxCount, totalFiber,totalVoxel] = fatFiberIntersectRoiR2R(fatDir,fgDir, sessid, ...
     runName, fgName, roiName, foi, radius)
 % fatFiberIntersectRoi(fatDir, sessid, runName, fgName, roiName, foi, radius)
 % roiName, cell array
@@ -23,7 +23,7 @@ voxCount = fiberCount;
 
         fprintf('Fiber count for (%s, %s, %s)\n',...
             sessid, runName, fgName);
-        runDir = fullfile(fatDir,sessid,runName,'dti96trilin/');
+        runDir = fullfile(fatDir,sessid,runName,'dti96trilin');
         fgFile = fullfile(fgDir,fgName);
         load(fgFile);
         if exist('fg')==1
@@ -42,7 +42,7 @@ voxCount = fiberCount;
         end
         
         % use ref image info to convert the acpa coords to img coords
-        refImg = niftiRead(fullfile(runDir,'/bin','b0.nii.gz'),[]);
+        refImg = niftiRead(fullfile(runDir,'bin','b0.nii.gz'),[]);
         dist = radius + nthroot(prod(refImg.pixdim),3);
        
         for i = 1:nRoi
@@ -70,7 +70,8 @@ voxCount = fiberCount;
                     % distance betwee a fg and a roi
                     D = reshape(pdist2(fc,rc),2,nfiber,nvox);
                     D = permute(D,[2,3,1])< dist;
-                    D = xor(D(:,:,1),D(:,:,2)); 
+                    D = xor(D(:,:,1),D(:,:,2));
+                    D= (D-1)*-1;
                     voxCount(i,j) = sum(any(D,1)); 
                     % fiber idx of a fg which connect a roi
                     idx = any(D,2); 
@@ -86,8 +87,8 @@ voxCount = fiberCount;
                 
                 % save the fiber group intersecting with roi
                 [~,roiNameWoExt] = fileparts(roiName{i});
-                roifgFile = fullfile(runDir,'fibers/afq',...
-                    sprintf('%s_r%.2f_%s.mat',roiNameWoExt,radius,fgNameWoExt));
+                roifgFile = fullfile(runDir,'fibers','afq',...
+                    sprintf('%s_avo.mat',fgNameWoExt));
                 save(roifgFile, 'roifg','fidx');
                 clear roifg fidx;            
              end

@@ -1,18 +1,16 @@
-function fiberCount = fatRoiFiberUnique(fatDir, sessid, runName, fgName, roiName, foi, radius)
+function fiberCount = fatRoiFiberOverlapR2R(fatDir, sessid, runName, fgName, foi, radius)
 % fatRoiFiberUnique(fatDir, sessid, runName, fgName, roiName, foi, radius)
 % roiName, cell array
 % foi, vector
 % radius, scalar
 % fgName should be specified according to the afq dir
-if nargin < 7, radius = '0.00'; end
-
-nRoi = length(roiName);
+nRoi = length(fgName);
 nFg = length(foi);
 nRun = length(runName);
 nSubj = length(sessid);
 fiberCount = nan(nRoi,nFg,nRun,nSubj);
 
-fprintf('Fiber unique for %s\n', fgName);
+fprintf('Fiber unique for %s\n', fgName{1});
 for s = 1:nSubj
     for r = 1:nRun
         fprintf('(%s, %s)\n', sessid{s}, runName{r});
@@ -21,9 +19,8 @@ for s = 1:nSubj
         %% Read fg from all rois
         roi = [];
         for i = 1:nRoi
-            roifgFile = fullfile(runDir,'fibers','afq',...
-                sprintf('%s_r%s_%s.mat',roiName{i},radius,fgName));
-            if exist(roifgFile,'file') 
+            roifgFile = fullfile(runDir,'fibers','afq',fgName{i});
+            if exist(roifgFile,'file')
                 roi = [roi,i];
                 F = load(roifgFile);
                 fg(length(roi),:) = F.roifg(foi);
@@ -35,7 +32,7 @@ for s = 1:nSubj
             %% Remove overlap fibers
             for f = 1:nFg
                 % Get unique fiber for a fg
-                U = sum(reshape(cell2mat(idx(:,f)),[],length(roi)),2)< 2;
+                U = sum(reshape(cell2mat(idx(:,f)),[],length(roi)),2)>1;
                 for i = 1:length(roi)
                     A = idx{i,f}; % old idx
                     B = A & U; % new non-overlaping fiber idx
@@ -48,28 +45,29 @@ for s = 1:nSubj
                 end
             end
             
-            %% save unique fibers for existing roi
-%                         for i = 1:length(roi)
-%             roifgFile = fullfile(runDir,'fibers','afq',...
-%                 sprintf('%s_%s_r%s_%s_unique.mat',roiName{1},roiName{2},radius,fgName))
-%                 roifg = fg(i,:);
-%                 fidx = idx(i,:);
-%                 
-%                 save(roifgFile, 'roifg','fidx');
-%                 clear roifg fidx;
-%             end
-
-            for i = 1:1
-                roifgFile = fullfile(runDir,'fibers','afq',...
-                    sprintf('%s_r%s_%s_unique.mat',roiName{i},radius,fgName))
+            %% save unique fibers for existed roi
+            for i = 1:length(roi)
+            roifgFile = fullfile(runDir,'fibers','afq',...
+                sprintf('%s_overlap.mat',fgName))
+                roifg = fg(i,:);
+                fidx = idx(i,:);
+                
+                save(roifgFile, 'roifg','fidx');
+                clear roifg fidx;
             end
-            roifg = fg(i,:);
-            fidx = idx(i,:);
-            
-            save(roifgFile, 'roifg','fidx');
-            clear roifg fidx;
-        end
-        
+%             
+%             for i = 1:1
+%                 roifgFile = fullfile(runDir,'fibers','afq',...
+%                     sprintf('%s_r%s_%s_overlap.mat',roiName{i},radius,fgName))
+%             end
+%             roifg = fg(i,:);
+%             fidx = idx(i,:);
+%             
+%             save(roifgFile, 'roifg','fidx');
+%             clear roifg fidx;
+%         end
+
+
              clear fg idx;
         end
     end

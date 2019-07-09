@@ -1,0 +1,107 @@
+
+function [DIFF_FULLY_PROCESSED] = fatPreProcMRtrix3(fatDir, sessid, runName)
+% This code is based on https://github.com/vistalab/RTP-prep. It was
+% adujsted so that preprco can be ru locally in matlab. This code does not
+% include reverse phase encoding images, as this was not applicable in my
+% data
+%this code has many dependencies, including fsl (I used version 6.02. with
+%cuda 9.1)
+
+bkgrnd = false;
+verbose = true;
+mrtrixVersion = 3;
+
+DIFF=fullfile(fatDir, sessid, runName, 'raw/run1.nii.gz')
+BVAL=fullfile(fatDir, sessid, runName, 'raw/run1.bval')
+BVEC=fullfile(fatDir, sessid, runName, 'raw/run1.bvec')
+
+OutDir=fullfile(fatDir, sessid, runName);
+
+disp('Converting input files to mrtrix format...');
+DIFF_MRtrix=fullfile(fatDir, sessid, runName, 'dwi.mif');
+B_MRtrix=fullfile(fatDir, sessid, runName, 'dwi.b');
+cmd_str = ['mrconvert -fslgrad ' BVEC ' ' BVAL ' ' DIFF ' ' DIFF_MRtrix ' --export_grad_mrtrix ' B_MRtrix ' -quiet -force'];
+[status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+
+disp('Creating processing mask...');
+MASK=fullfile(OutDir,'dwi_b0_brain_mask.mif');
+cmd_str = ['dwi2mask ' DIFF_MRtrix ' ' MASK ' -force -quiet'];
+[status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+
+disp('Check and correct gradient orientation and create corrected image');
+DIFF_MRtrix_CORR=fullfile(fatDir, sessid, runName, 'dwi_cor.mif');
+cmd_str = ['dwigradcheck ' DIFF_MRtrix ' -grad ' B_MRtrix ' -mask ' MASK ' -export_grad_mrtrix cor1.b -force -tempdir ./tmp -quiet'];
+[status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+cmd_str = ['mrconvert ' DIFF_MRtrix ' -grad ' fullfile(OutDir,'cor1.b') ' ' DIFF_MRtrix_CORR ' -quiet -force'];
+[status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+
+disp('Performing PCA denoising...');
+DIFF_MRtrix_Denoise=fullfile(fatDir, sessid, runName, 'dwi_denoise.mif');
+cmd_str = ['dwidenoise -extent 5,5,5 -noise noise.mif ' DIFF_MRtrix  ' ' DIFF_MRtrix_Denoise ' -force -quiet'];
+[status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+
+disp('Performing Gibbs ringing correction..');
+DIFF_MRtrix_Denoise_Gibbs=fullfile(fatDir, sessid, runName, 'dwi_denoise_degibbs.mif');
+cmd_str = ['mrdegibbs -nshifts 20 -minW 1 -maxW 3 ' DIFF_MRtrix_Denoise ' ' DIFF_MRtrix_Denoise_Gibbs ' -quiet -force'];
+[status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+ 
+disp('Performing FSL eddy correction, this will take a long time...');
+DIFF_MRtrix_Denoise_Gibbs_Eddy=fullfile(fatDir, sessid, runName, 'dwi_denoise_degibbs_eddy.mif');
+cmd_str = ['dwipreproc -eddy_options " --repol --data_is_shelled --slm=linear --mporder=4" -rpe_none -pe_dir PA ' DIFF_MRtrix_Denoise_Gibbs ' ' DIFF_MRtrix_Denoise_Gibbs_Eddy ' -eddyqc_text ' OutDir ' -tempdir ./tmp -quiet'];
+[status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+
+disp('Creating dwi space b0 reference images...');
+cmd_str = ['dwiextract ' DIFF_MRtrix_Denoise_Gibbs_Eddy ' - -bzero -quiet | mrmath - mean dwi_b0.mif -axis 3 -quiet'];
+[status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+MASK=fullfile(OutDir,'dwi_processed_b0_brainMask.mif');
+cmd_str = ['dwi2mask ' DIFF_MRtrix_Denoise_Gibbs_Eddy ' ' MASK ' -force -quiet'];
+[status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+
+disp('Converting files to nifti for alignment to anatomy later on')
+b0=fullfile(OutDir,'dwi_b0.mif');
+b0nii=fullfile(OutDir,'dwi_processed_b0.nii.gz');
+cmd_str = ['mrconvert ' b0 ' -stride 1,2,3,4 ' b0nii ' -quiet'];
+[status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+cmd_str = ['mrconvert ' MASK ' -stride 1,2,3,4 dwi_processed_b0_brainMask.nii.gz  -quiet'];
+[status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+MASKnii=fullfile(OutDir,'dwi_processed_b0_brainMask.nii.gz');
+cmd_str = ['fslmaths ' b0nii ' -mas ' MASKnii ' dwi_processed_b0_brain.nii.gz'];
+[status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+
+disp('Computing bias correction with ANTs on dwi data...');
+DIFF_MRtrix_Denoise_Gibbs_Eddy_Bias=fullfile(fatDir, sessid, runName, 'dwi_denoise_degibbs_eddy_bias.mif');
+cmd_str = ['dwibiascorrect -mask ' MASK ' -ants '  DIFF_MRtrix_Denoise_Gibbs_Eddy ' ' DIFF_MRtrix_Denoise_Gibbs_Eddy_Bias ' -tempdir ./tmp -quiet'];
+[status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+
+disp('Perform Rician background noise removal...');
+DIFF_MRtrix_Denoise_Gibbs_Eddy_Bias_Ricn=fullfile(fatDir, sessid, runName, 'dwi_denoise_degibbs_eddy_bias_ricn.mif');
+cmd_str = ['mrinfo ' DIFF_MRtrix_Denoise_Gibbs_Eddy_Bias ' -export_grad_mrtrix tmp.b'];
+[status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+cmd_str = ['mrcalc noise.mif -finite noise.mif 0 -if lowbnoisemap.mif  -quiet'];
+[status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+cmd_str = ['mrcalc ' DIFF_MRtrix_Denoise_Gibbs_Eddy_Bias ' 2 -pow lowbnoisemap.mif 2 -pow -sub -abs -sqrt - -quiet | mrcalc - -finite - 0 -if tmp.mif -quiet'];
+system(cmd_str)
+cmd_str = ['mrconvert tmp.mif -grad tmp.b ' DIFF_MRtrix_Denoise_Gibbs_Eddy_Bias_Ricn ' -quiet'];
+[status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+cmd_str = ['rm -f tmp.mif tmp.b'];
+[status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+
+disp('Creating fully preprocessed dwi files in native space...');
+DIFF_FULLY_PROCESSED = fullfile(fatDir, sessid, runName, 'dwi_processed.nii.gz');
+cmd_str = ['mrconvert ' DIFF_MRtrix_Denoise_Gibbs_Eddy_Bias_Ricn ' -stride 1,2,3,4 ' DIFF_FULLY_PROCESSED ' -export_grad_fsl dwi_processed.bvecs dwi_processed.bvals -export_grad_mrtrix dwi_processed.b -json_export dwi_processed.json -quiet'];
+[status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+
+disp('Cleaning up working directory...')
+!rm -rf ./tmp;
+
+% ## cleanup
+% #find . -maxdepth 1 -mindepth 1 -type f -name "*.mif" ! -name "${difm}.mif" -delete
+% #find . -maxdepth 1 -mindepth 1 -type f -name "*.b" ! -name "${difm}.b" -delete
+% rm -f *.mif
+% rm -f *.b
+% rm -f *fast*.nii.gz
+% rm -f *init.mat
+% rm -f dwi2acpc.nii.gz
+% rm -rf ./tmp
+end
+

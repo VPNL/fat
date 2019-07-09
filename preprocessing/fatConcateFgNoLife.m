@@ -1,4 +1,4 @@
-function fatConcateFg(fatDir, sessid, runName, fgInName,fgOutName)
+function fatConcateFgNoLife(fatDir, sessid, runName, fgInName,fgOutName)
 % Concatenate optimized LiFE from different parameters to create
 % final LiFE. In this function, we simply concatenate streamlines in each connectome
 % (fg structure) to create new connectome as fg file.
@@ -10,7 +10,7 @@ for s = 1:length(sessid)
     for r = 1:length(runName)
         fprintf('Concate Fg (%s, %s, %s)\n',sessid{s},runName{r},fgOutName);
         
-        fiberDir = fullfile(fatDir,sessid{s},runName{r},'dti96trilin');
+        fiberDir = fullfile(fatDir,sessid{s},runName{r},'dti96trilin','fibers');
         % Load fgfile to input;
         for i = 1:length(fgInName)
             fg(i) = fgRead(fullfile(fiberDir, fgInName{i}));
@@ -21,7 +21,7 @@ for s = 1:length(sessid)
         % Set name for connectome file to save
         fgConcat.name = fullfile(fiberDir,fgOutName);
         % Set fibres
-        fgConcat.fibers = cat(1,fg.fibers);
+        fgConcat.fibers = cat(1,fg.fg.fibers);
         
         % Write file
         fgWrite(fgConcat);

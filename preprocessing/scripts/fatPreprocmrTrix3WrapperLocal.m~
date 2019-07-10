@@ -83,19 +83,20 @@ for s=1
 %         niftiWrite(nii,fullfile(fatDir,sessid{s},runName{r},'dwi_processed.nii.gz'));
 %         
         %4) Initiate a dt.mat data structure
-%        [dt6folder, dt6file]=fatCreateDT6(fatDir,sessid(s),runName(r),t1_name,1);
-
+        [dt6folder, dt6file]=fatCreateDT6(fatDir,sessid(s),runName(r),t1_name,1);
+        
         %5) Set up tractography for mrtrix 3
-%         anatFolder=fullfile(fsDir,anatid{s},'mri');
-%         files = AFQ_mrtrixInit(dt6file, ...
-%             lmax,...
-%             fullfile(fatDir,sessid{s},runName{r},dt6folder.name,'mrtrix'),...
-%             mrtrixversion, ...
-%             multishell, ... % true/false
-%             track_tool,... % 'fsl', 'freesurfer'
-%             1,...
-%             anatFolder);
-%         
+        anatFolder=fullfile(fsDir,anatid{s},'mri');
+        
+        files_out = AFQ_mrtrixInit(dt6file, ...
+            lmax,...
+            fullfile(fatDir,sessid{s},runName{r},dt6folder.name,'mrtrix'),...
+            mrtrixversion, ...
+            multishell, ... % true/false
+            track_tool,... % 'fsl', 'freesurfer'
+            1,...
+            anatFolder);
+
 %         %6) Create a better wm mask
 %         fatMakeWMmask(fatDir, anatDir_system, anatid(s), sessid(s),runName{r},t1_name,'wm', 1)
 %         cmd_str=['mrconvert ' fullfile(anatDir_system, anatid{s},'wm_mask_resliced.nii.gz') ' ' fullfile(fatDir,sessid{s},runName{r},dt6folder.name,'mrtrix','wm_mask_from_freesurfer.mif')]
@@ -103,40 +104,40 @@ for s=1
 %         
         
 %5) Create connectomes
-[status, results, out_fg] = fatCreateConnectomeMRtrix3ACT(fullfile(fatDir,sessid{s},runName{r},dt6folder.name),...
-    files, ...
-    fullfile(fatDir,sessid{s},runName{r},dt6folder.name,'mrtrix','dwi_processed_aligned_trilin_noMEC_5tt_seed_gmwmi.mif'), ...
-    algo, ...
-    seeding, ...
-    nSeeds, ...
-    background, ...
-    verbose, ... %verbose
-    clobber, ... %clobber
-    mrtrixversion, ...
-    ET)
+% [status, results, out_fg] = fatCreateConnectomeMRtrix3ACT(fullfile(fatDir,sessid{s},runName{r},dt6folder.name),...
+%     files, ...
+%     fullfile(fatDir,sessid{s},runName{r},dt6folder.name,'mrtrix','dwi_processed_aligned_trilin_noMEC_5tt_seed_gmwmi.mif'), ...
+%     algo, ...
+%     seeding, ...
+%     nSeeds, ...
+%     background, ...
+%     verbose, ... %verbose
+%     clobber, ... %clobber
+%     mrtrixversion, ...
+%     ET)
 
 
 %6) Optional: Run LiFE to optimize the ET connectome
-if runLife > 0
-    fgname=out_fg;
-    out_fg=fatRunLifeMRtrix3(fatDir, sessid{s}, runName{r},fgname,t1_name);
-end
-
-%7) Optional: Run AFQ to classify the fibers
-if classifyConnectome >0
-    fatMakefsROI(anatDir,anatid{s},sessid{s},1) % first create the ROIs needed for AFQ using freesurfer
-    
-    fgName=out_fg;
-    out_fg=fatSegmentConnectomeMRtrix3(fatDir, anatDir, anatid(s), sessid{s}, runName{r}, fgName)
-end
-
-%8) Optional: Clean Connectome with AFQ
-if cleanConnectome >0
-    for r=1:length(runName)
-        fgName=out_fg;
-        out_fg=fatCleanConnectomeMRtrix3(fatDir, anatDir, anatid(s), sessid{s}, runName{r}, fgName)
-    end
-end
+% if runLife > 0
+%     fgname=out_fg;
+%     out_fg=fatRunLifeMRtrix3(fatDir, sessid{s}, runName{r},fgname,t1_name);
+% end
+% 
+% %7) Optional: Run AFQ to classify the fibers
+% if classifyConnectome >0
+%     fatMakefsROI(anatDir,anatid{s},sessid{s},1) % first create the ROIs needed for AFQ using freesurfer
+%     
+%     fgName=out_fg;
+%     out_fg=fatSegmentConnectomeMRtrix3(fatDir, anatDir, anatid(s), sessid{s}, runName{r}, fgName)
+% end
+% 
+% %8) Optional: Clean Connectome with AFQ
+% if cleanConnectome >0
+%     for r=1:length(runName)
+%         fgName=out_fg;
+%         out_fg=fatCleanConnectomeMRtrix3(fatDir, anatDir, anatid(s), sessid{s}, runName{r}, fgName)
+%     end
+% end
     end
 end
 

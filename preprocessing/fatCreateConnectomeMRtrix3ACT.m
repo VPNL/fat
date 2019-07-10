@@ -63,9 +63,10 @@ end
         if ~exist(fgFileNameWithDir{na},'file') || strcmp(clobber,'true')>0;
             [status,results] = AFQ_mrtrix_cmd(cmd_str, background, verbose,mrtrixVersion);
         end
-        numconcatenate = [numconcatenate, nSeeds];
+     %   numconcatenate = [numconcatenate, nSeeds];
      end
-    fg = et_concatenateconnectomes(fgFileNameWithDir, tck_file, numconcatenate, 'tck'); 
+    
+    fg = et_concatenateconnectomes(fgFileNameWithDir, tck_file, [], 'tck'); 
     dtiWriteFiberGroup(fg, fgFileNameWithDir2);
 
 end

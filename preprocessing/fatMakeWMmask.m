@@ -1,4 +1,4 @@
-function fatMakeWMmask(fatDir, anatDir, anatid, sessid, t1_name, ventMeth, force)
+function fatMakeWMmask(fatDir, anatDir, anatid, sessid, runName, t1_name, ventMeth, force)
 % fatMakeWMmask(fatDir, anatid, ventMeth, force)
 % ventMeth: method to generate ventricle mask
 % This function will do:
@@ -81,7 +81,7 @@ for s = 1:length(anatid)
     t1Dir = fullfile(anatDir, anatid{s});
     cd(t1Dir)
     
-    if ~exist('wm_mask_resliced.nii.gz','file') || force
+    if ~exist(fullfile(fatDir,sessid{s},runName,'wm_mask_resliced.nii.gz'),'file') || force
         % read QMR class volume
         ni = readFileNifti(classQMR);
         
@@ -98,6 +98,7 @@ for s = 1:length(anatid)
         
         % write image
         ni.fname = 'wm_mask.nii.gz';
+        cd(fullfile(fatDir,sessid{s},runName));
         writeFileNifti(ni);
         clear ni;
         
@@ -106,15 +107,15 @@ for s = 1:length(anatid)
         % and that it is of the same nifti size. We will use the wmProb mab in the
         % bin folder to align to. This requires the fat data to have been
         % preprocessed.
-        refVol = fullfile(fatDir, sessid{s}, ...
-            '96dir_run1/dti96trilin/bin/wmProb.nii.gz');
+        refVol = fullfile(fatDir, sessid{s},runName,'dwi_processed_b0_brainMask.nii.gz');
         if ~exist(refVol, 'file')
-            fprintf('%s: 96dir_run1 wmProb.nii.gz not exist\n', anatid{s})
+            fprintf('%s: dwi_processed_b0_brainMask.nii.gz does not exist\n', anatid{s})
             continue
         end
         
-        system(['mri_convert ' 'wm_mask.nii.gz ' '-rl ' refVol ...
-            ' -rt ' 'nearest wm_mask_resliced.nii.gz']);
+        cmd_str=['mri_convert ' 'wm_mask.nii.gz ' '-rl ' refVol ...
+            ' -rt ' 'nearest wm_mask_resliced.nii.gz'];
+        system(cmd_str);
     end
 end
 cd(cwd);

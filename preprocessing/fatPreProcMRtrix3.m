@@ -16,6 +16,7 @@ BVAL=fullfile(fatDir, sessid, runName, 'raw/run1.bval')
 BVEC=fullfile(fatDir, sessid, runName, 'raw/run1.bvec')
 
 OutDir=fullfile(fatDir, sessid, runName);
+cd(OutDir);
 
 disp('Converting input files to mrtrix format...');
 DIFF_MRtrix=fullfile(fatDir, sessid, runName, 'dwi.mif');
@@ -47,7 +48,7 @@ cmd_str = ['mrdegibbs -nshifts 20 -minW 1 -maxW 3 ' DIFF_MRtrix_Denoise ' ' DIFF
  
 disp('Performing FSL eddy correction, this will take a long time...');
 DIFF_MRtrix_Denoise_Gibbs_Eddy=fullfile(fatDir, sessid, runName, 'dwi_denoise_degibbs_eddy.mif');
-cmd_str = ['dwipreproc -eddy_options " --repol --data_is_shelled --slm=linear --mporder=4" -rpe_none -pe_dir PA ' DIFF_MRtrix_Denoise_Gibbs ' ' DIFF_MRtrix_Denoise_Gibbs_Eddy ' -eddyqc_text ' OutDir ' -tempdir ./tmp -quiet'];
+cmd_str = ['dwipreproc -eddy_options " --repol --data_is_shelled --slm=linear" -rpe_none -pe_dir PA ' DIFF_MRtrix_Denoise_Gibbs ' ' DIFF_MRtrix_Denoise_Gibbs_Eddy ' -eddyqc_text ' OutDir ' -tempdir ./tmp -quiet'];
 [status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
 
 disp('Creating dwi space b0 reference images...');

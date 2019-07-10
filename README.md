@@ -1,36 +1,18 @@
-﻿Diffusion tool box that combines Vistasoft, MRtrix, LiFE and AFQ  to produce functional defined white matter tracts. It requires the toolboxes mentioned before to be installed, and also requires fROIs defined using vistasoft. The pipeline is orgnized as below. 
+﻿Diffusion tool box that combines Vistasoft, MRtrix3, LiFE and AFQ to produce white matter connectomes. It requires the toolboxes mentioned before to be installed. The pipeline is orgnized as below. 
  
-A great place to start exploring this pipeline is the script "fat/preprocessing/scripts/fatPreprocEtWrapper.m", which was used to automatically process the data presented in the mrLanes manuscript.
+A great place to start exploring this pipeline is the script "fat/preprocessing/scripts/fatPreprocmrTrix3WrapperLocal.m", which includes the entire pipeline from raw dti data to connetomes. Please note that this pipeline does not currently include resverse phase encoding correction, and that the mutishell code has never been tested. The pipeline is organized as follows:
 
 
 1) Prepare fat data and directory structure
-fatPrepare(fatDir, sessid);
+2) Preprocess the data using mrTrix3
+3) The preprocessing flips our bvecs. We don't want that, so we copy our original bvecs from the raw folder. We also fix the nifti header.
+4) Initiate a dt.mat data structure
+5) Set up tractography for mrtrix 3
+6) Create a better wm mask with FreeSurfer
+7) Create connectomes with MRtrix3
+8) Optional: Run LiFE to optimize the connectome
+9) Optional: Run AFQ to classify the connectome
+10) Optional: Clean Connectome with AFQ
 
-2) Preprocess the dti data using vistasoft
-fatPreprocess(fatDir,sessid,runName,force)
+In addition to this preprocessing pipeline, what include an assortment of analysis and plotting function that might come in handy.
 
-4) Make wm mask from freesurfer output 
-fatMakeWMmask(fatDir, sessid, 'wm', force)
-
-5) Run MRtrix to create candidate connectomes with different parameters
-fatCreateEtConnectome(fatDir, sessid, runName);
-
-6) Concatenate candidate connectomes to construct the final ET connectome
-fatConcateFg(fatDir, sessid, runName(i), fgInName,fgOutName);
-
-7) Run LiFE to optimize the connectome
-fatRunLife(fatDir, sessid, runName(r), fgName, Niter, L, force);
-
-8) Run AFQ to classify the fibers
-fatMakefsROI(fatDir,sessid,force):create fsROI for fiber classification
-fatSegmentConnectome(fatDir, sessid, runName, fgName, computeRoi)
-
-9) Convert vista ROI to functional ROI 
-fatVistaRoi2DtiRoi(fatDir, sessid, runName, roiName)
-fatDtiRoi2Nii(fatDir, sessid, runName, roiName)
-
-9) Define FDFs and get fiber count
-fatFiberIntersectRoi(fatDir, sessid,runName, fgName, roiName, foi, radius) 
-
-10) Extract fiber proprieties
-fatTractQmr(fatDir, sessid, runName, fgName, qmrDir)

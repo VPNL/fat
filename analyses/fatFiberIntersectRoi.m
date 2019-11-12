@@ -42,7 +42,7 @@ voxCount = fiberCount;
         end
         
         % use ref image info to convert the acpa coords to img coords
-        refImg = niftiRead(fullfile(runDir,'/bin','b0.nii.gz'),[]);
+        refImg = niftiRead(fullfile(runDir,'mrtrix','b0.nii.gz'),[]);
         dist = radius + nthroot(prod(refImg.pixdim),3);
        
         for i = 1:nRoi

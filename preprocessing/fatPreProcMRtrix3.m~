@@ -1,12 +1,15 @@
 
 function [DIFF_FULLY_PROCESSED] = fatPreProcMRtrix3(fatDir, sessid, runName)
 % This code is based on https://github.com/vistalab/RTP-prep. It was
-% adujsted so that preprco can be ru locally in matlab. This code does not
+% adjusted so that preprocessing can be run locally in matlab. This code does not
 % include reverse phase encoding images, as this was not applicable in my
 % data
-%this code has many dependencies, including fsl (I used version 6.02. with
-%cuda 9.1)
-
+% this code has many dependencies, including fsl (I used version 6.02. with
+% cuda 9.1)
+% who is the author?
+% date?
+% what does this code do?
+%
 bkgrnd = false;
 verbose = true;
 mrtrixVersion = 3;
@@ -24,6 +27,7 @@ B_MRtrix=fullfile(fatDir, sessid, runName, 'dwi.b');
 cmd_str = ['mrconvert -fslgrad ' BVEC ' ' BVAL ' ' DIFF ' ' DIFF_MRtrix ' --export_grad_mrtrix ' B_MRtrix ' -quiet -force'];
 [status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
 
+
 disp('Creating processing mask...');
 MASK=fullfile(OutDir,'dwi_b0_brain_mask.mif');
 cmd_str = ['dwi2mask ' DIFF_MRtrix ' ' MASK ' -force -quiet'];
@@ -31,14 +35,16 @@ cmd_str = ['dwi2mask ' DIFF_MRtrix ' ' MASK ' -force -quiet'];
 
 disp('Check and correct gradient orientation and create corrected image');
 DIFF_MRtrix_CORR=fullfile(fatDir, sessid, runName, 'dwi_cor.mif');
+B_MRtrix_CORR=fullfile(fatDir, sessid, runName, 'cor1.b');
 cmd_str = ['dwigradcheck ' DIFF_MRtrix ' -grad ' B_MRtrix ' -mask ' MASK ' -export_grad_mrtrix cor1.b -force -tempdir ./tmp -quiet'];
 [status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+
 cmd_str = ['mrconvert ' DIFF_MRtrix ' -grad ' fullfile(OutDir,'cor1.b') ' ' DIFF_MRtrix_CORR ' -quiet -force'];
 [status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
 
 disp('Performing PCA denoising...');
 DIFF_MRtrix_Denoise=fullfile(fatDir, sessid, runName, 'dwi_denoise.mif');
-cmd_str = ['dwidenoise -extent 5,5,5 -noise noise.mif ' DIFF_MRtrix  ' ' DIFF_MRtrix_Denoise ' -force -quiet'];
+cmd_str = ['dwidenoise -extent 5,5,5 -noise noise.mif ' DIFF_MRtrix_CORR  ' ' DIFF_MRtrix_Denoise ' -force -quiet'];
 [status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
 
 disp('Performing Gibbs ringing correction..');
@@ -89,7 +95,7 @@ cmd_str = ['rm -f tmp.mif tmp.b'];
 
 disp('Creating fully preprocessed dwi files in native space...');
 DIFF_FULLY_PROCESSED = fullfile(fatDir, sessid, runName, 'dwi_processed.nii.gz');
-cmd_str = ['mrconvert ' DIFF_MRtrix_Denoise_Gibbs_Eddy_Bias_Ricn ' -stride 1,2,3,4 ' DIFF_FULLY_PROCESSED ' -export_grad_fsl dwi_processed.bvecs dwi_processed.bvals -export_grad_mrtrix dwi_processed.b -json_export dwi_processed.json -quiet'];
+cmd_str = ['mrconvert ' DIFF_MRtrix_Denoise_Gibbs_Eddy_Bias_Ricn ' -stride -1,2,3,4 ' DIFF_FULLY_PROCESSED ' -export_grad_fsl dwi_processed.bvecs dwi_processed.bvals -export_grad_mrtrix dwi_processed.b -json_export dwi_processed.json -quiet'];
 [status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
 
 disp('Cleaning up working directory...')

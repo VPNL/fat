@@ -1,4 +1,4 @@
-function fatRunLifeMRtrix3(fatDir, sessid, runName, fgName, t1_name, Niter, L, force)
+function fgAfterLife=fatRunLifeMRtrix3(fatDir, sessid, runName, fgName, Niter, L)
 % fe = fatRunLife(fatDir, sessid, runName, fgName, Niter, L, force)
 % This function run LIFE on the candidate ensemble connectome produced
 % from fatRunET.
@@ -11,27 +11,29 @@ if nargin < 6, Niter = 250; end % Number of iteration for LiFE
 %mrtrixFolderParts  = split(csdFile, filesep);
 % Obtain the session name. This is usually the zip name if it has not
 % been edited. 
-sessionDir = fullfile(fatDir,sessid);
-dt6Dir=fullfile(sessionDir,'/96dir_run1/fw_afq_ET_ACT_LiFE_3.0.2_lmax8/dti96trilin')
-MRtrixDir=fullfile(sessionDir,'/96dir_run1/fw_afq_ET_ACT_LiFE_3.0.2_lmax8/dti96trilin/mrtrix')
-fiberDir=fullfile(sessionDir,'/96dir_run1/fw_afq_ET_ACT_LiFE_3.0.2_lmax8/dti96trilin/fibers')
+sessionDir = fullfile(fatDir,sessid,runName);
+cd(sessionDir);
+        subdir=dir('*trilin')
+        runDir = fullfile(sessionDir,subdir.name);
+MRtrixDir=fullfile(runDir,'mrtrix')
+fiberDir=fullfile(runDir,'fibers')
 
-lifedir    = fullfile(sessionDir, 'dti96trilin/LiFE');
+lifedir    = fullfile(runDir, 'LiFE');
 
 config.dtiinit             = fatDir;
 config.track               = fullfile(fiberDir,fgName);
-config.life_discretization = 360;
-config.num_iterations      = 500;
+config.life_discretization = L;
+config.num_iterations      = Niter;
 
 % Change dir to LIFEDIR so that it writes everything there
 if ~exist(lifedir); mkdir(lifedir); end;
 cd(lifedir)
 
 disp('loading dt6.mat')
-disp(['Looking for file: ' fullfile(dt6Dir, 'dt6.mat')])
-dt6 = load(fullfile(dt6Dir, 'dt6.mat'))
+disp(['Looking for file: ' fullfile(runDir, 'dt6.mat')])
+dt6 = load(fullfile(runDir, 'dt6.mat'))
 [~,NAME,EXT] = fileparts(dt6.files.alignedDwRaw);
-aligned_dwi = fullfile(MRtrixDir, [NAME,EXT])
+aligned_dwi = fullfile(sessionDir, [NAME,EXT]);
  %fg      = fgRead(fullfile(fiberDir,fgName));
  
 [fe, out] = life(config, aligned_dwi);
@@ -45,10 +47,11 @@ fprintf('number of non-0 weight tracks	: %d (%f)\n', out.stats.non0_tracks, out.
 fg_LiFE = out.life.fg;
 % And I think I would need to write and substitute the non cleaned ET tractogram tck with the new one...
 % Write the tck and mat files
-tck_file_life = fullfile(fiberDir,'WholeBrainFGAtlas_LiFE.tck');
+tck_file_life = fullfile(fiberDir,'WholeBrainFG_LiFE.tck');
 fgWrite(fg_LiFE, tck_file_life, 'tck');
 % fg = fgRead(tck_file_life);
 
-dtiWriteFiberGroup(fg_LiFE, fullfile(fiberDir, 'WholeBrainFGAtlas_LiFE.mat'));
+fgAfterLife='WholeBrainFG_LiFE.mat';
+dtiWriteFiberGroup(fg_LiFE, fullfile(fiberDir, fgAfterLife));
 end
 

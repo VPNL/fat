@@ -51,10 +51,10 @@ for na=1:length(angleValues)
     fgFileNameWithDir{na}=fullfile(tractPath, '/fibers/', fgFileName{na});
     fgFileNameWithDir2=fullfile(tractPath, '/fibers/WholeBrainFGRadSe.mat');
     else
-    tck_file = fullfile(tractPath, '/fibers/',strcat(roi,'_FG_masked.tck'));
-    fgFileName{na}=[strcat(roi,'_Fibers_angle') strrep(num2str(angleValues(na)),'.','p') '.tck'];
+    tck_file = fullfile(tractPath, '/fibers/',strcat(roi,'_FG_maskedRadSe.tck'));
+    fgFileName{na}=[strcat(roi,'_FibersRadSe_angle') strrep(num2str(angleValues(na)),'.','p') '.tck'];
     fgFileNameWithDir{na}=fullfile(tractPath, '/fibers/', fgFileName{na});
-    fgFileNameWithDir2=fullfile(tractPath, '/fibers/',strcat(roi,'_FG_masked.mat'));
+    fgFileNameWithDir2=fullfile(tractPath, '/fibers/',strcat(roi,'_FG_maskedRadSe.mat'));
     end   
         
         
@@ -83,9 +83,9 @@ for na=1:length(angleValues)
     end
     
     % Run it, if the file is not there (this is for debugging)
-    %if ~exist(fgFileNameWithDir{na},'file') || strcmp(clobber,'true')>0;
+    if ~exist(fgFileNameWithDir{na},'file') || strcmp(clobber,'true')>0;
         [status,results] = AFQ_mrtrix_cmd(cmd_str, background, verbose,mrtrixVersion);
-    %end
+    end
     %   numconcatenate = [numconcatenate, nSeeds];
 end
 

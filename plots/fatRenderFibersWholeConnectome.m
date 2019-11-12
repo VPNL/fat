@@ -13,10 +13,11 @@ if strcmp(hemi,'lh')
     cameraView = [-60,10];
     xplane =  [-15, 0, 0];
 else strcmp(hemi,'rh')
-    cameraView = 'rightsag';
+    cameraView = [60,10];
     xplane =  [15,0,0];
 end
 zplane = [0, 0, -10];
+
  
 
 
@@ -24,11 +25,18 @@ zplane = [0, 0, -10];
 % colorMap= jet(length(foi));
 
 % set criteria
-maxDist = 2.5;maxLen = 2;numNodes = 100;M = 'mean';maxIter = 1;count = false;
-numfibers = 75;
+maxDist = 4; maxLen = 4;numNodes = 100;M = 'mean';maxIter = 200;count = false;
+numfibers = 50;
         fprintf('Plot fiber %s-%s:%s\n',sessid,runName,fgName);
-        runDir = fullfile(fatDir,sessid,runName,'dti96trilin');
+        
+        cd(fullfile(fatDir,sessid,runName))
+        subdir=dir('*trilin');
+        runDir = fullfile(fatDir,sessid,runName,subdir.name);
         afqDir = fullfile(runDir, 'fibers','afq');
+        if ~exist(afqDir, 'dir')
+            mkdir(afqDir);
+        end
+        
         imgDir = fullfile(afqDir,'image');
         if ~exist(imgDir,'dir')
             mkdir(imgDir);
@@ -70,7 +78,7 @@ numfibers = 75;
             clear fg roifg
             
        %     print('-depsc',fullfile(imgDir,sprintf('%s.eps',fName)));
-            print('-dtiff','-r300',fullfile(imgDir,sprintf('%s.tiff',fName)));
+            print('-dtiff','-r300',fullfile(imgDir,sprintf('%s.tiff',strcat(hemi,'_',fName))));
             end
            % close all;
 end

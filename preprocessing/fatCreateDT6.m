@@ -13,7 +13,7 @@ for s = 1:length(sessid)
         runDir = fullfile(dwiDir,sessid{s},runName{r});
         
         % Init the params through vistasoft
-        dwParams = dtiInitParams('clobber',-1);
+        dwParams = dtiInitParams('clobber',force);
         dwParams.eddyCorrect =-1;
         dwParams.outDir=runDir;
         
@@ -34,7 +34,7 @@ for s = 1:length(sessid)
             fprintf('Beginning dwi preprocess for (%s,%s)\n',...
                 sessid{s},runName{r})
             
-            dtiInit(dtiNiftiPath,t1NiftiPath,dwParams);
+            fat_AFQ_dtiInit(dtiNiftiPath,t1NiftiPath,dwParams);
             
             fprintf('Succesfully created dt6 file for for (%s,%s)\n',...
                 sessid{s},runName{r});
@@ -44,7 +44,7 @@ for s = 1:length(sessid)
         end
         
         cd(runDir)
-        dtFolder=dir('dti*') ;
+        dtFolder=dir('*trilin') ;
         dtFile=fullfile(runDir,dtFolder.name,'dt6.mat');
     end
 end

@@ -1,5 +1,5 @@
 
-function dwiPrepareMRtrix3(dwiDir,sessid, anatDir_system, anatDir_system_output, run)
+function fatPrepareMRtrix3(dwiDir,sessid, anatDir_system, anatDir_system_output, run)
 
 % modify from niftisToFileBranch
 % This function will take two niftis folders and turn them into the
@@ -21,12 +21,12 @@ bvecs = {bvecs.name};
 % reorgnize data directory for each run
 cd(subjDir);
 % rename run dir
-name=['96dir_run' num2str(run) '_local']
+name=['96dir_run' num2str(run) '_noFW']
 mkdir(name)
-copyfile(niftis{run}, ['96dir_run' num2str(run) '_local']);
-copyfile(bvals{run}, ['96dir_run' num2str(run) '_local']);
-copyfile(bvecs{run}, ['96dir_run' num2str(run) '_local']);
-cd(['96dir_run' num2str(run) '_local'])
+copyfile(niftis{run}, ['96dir_run' num2str(run) '_noFW']);
+copyfile(bvals{run}, ['96dir_run' num2str(run) '_noFW']);
+copyfile(bvecs{run}, ['96dir_run' num2str(run) '_noFW']);
+cd(['96dir_run' num2str(run) '_noFW'])
 
 % make raw dir for each run
 mkdir('raw');

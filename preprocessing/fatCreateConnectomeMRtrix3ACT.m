@@ -38,6 +38,9 @@ if ~isempty(roi)
     mask= fullfile(roipath,strcat(roi,'.nii.gz'));
     cmd_str   = ['5tt2gmwmi -force -mask_in  ' mask ' ' file5tt  ' ' gmwmi ];
     AFQ_mrtrix_cmd(cmd_str, background, verbose,mrtrixVersion) 
+else
+    cmd_str   = ['5tt2gmwmi -force ' file5tt  ' ' gmwmi ];
+    AFQ_mrtrix_cmd(cmd_str, background, verbose,mrtrixVersion) 
 end
 
 cmd_str = ['mkdir ' (fullfile(tractPath,'fibers'))];
@@ -90,7 +93,7 @@ for na=1:length(angleValues)
 end
 
 if ET==1
-fg = et_concatenateconnectomes(fgFileNameWithDir, tck_file, [], 'tck');
+fg = fat_et_concatenateconnectomes(fgFileNameWithDir, tck_file, [], 'tck');
 else
 fg=fgRead(fgFileNameWithDir{na});
 dtiWriteFiberGroup(fg, fgFileNameWithDir2);

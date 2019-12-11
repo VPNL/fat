@@ -312,8 +312,9 @@ params.subDir = fileparts(dataDir);
 % Some day I will try to understand why they are doing this...
 [fullParentDir, binDir] = fileparts(binDirName);
 [ppBinDir, pBinDir] = fileparts(fullParentDir);
-pBinDir = fullfile(pBinDir,binDir);
-
+%pBinDir = fullfile(pBinDir,binDir); this was changed for ek, make sure it
+%still works for other people
+pBinDir = fullfile(fullParentDir,binDir);
 
 % Now decide which ones of this files I will create with mrTrix and which
 % ones I will leave uncreated

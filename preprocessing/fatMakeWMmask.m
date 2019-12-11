@@ -107,9 +107,9 @@ for s = 1:length(anatid)
         % and that it is of the same nifti size. We will use the wmProb mab in the
         % bin folder to align to. This requires the fat data to have been
         % preprocessed.
-        refVol = fullfile(fatDir, sessid{s},runName,'dwi_processed_b0_brainMask.nii.gz');
+        refVol = fullfile(fatDir, sessid{s},runName,'dwi_processed_b0_brainmask.nii.gz');
         if ~exist(refVol, 'file')
-            fprintf('%s: dwi_processed_b0_brainMask.nii.gz does not exist\n', anatid{s})
+            fprintf('%s: dwi_processed_b0_brainmask.nii.gz does not exist\n', anatid{s})
             continue
         end
         

@@ -66,7 +66,7 @@ cleanConnectome = 1; % do you want to clean the connectome with AFQ? Enter 1 or 
 generatePlots =1; % do you want to generates some simple plots of fiber tracts for quality assurance? Enter 1 or 0
 roi='lh_OTS_from_fsaverage_manual'; % will be used as masked for seeding. Use [] if you don't want a mask.
 
-for s=[1]
+for s=1:30
     for r=1:length(runName)
         % %The following parameters need to be adjusted to fit your system
 %         anatDir_system_current=fullfile(anatDir_system, anatid{s});
@@ -144,14 +144,13 @@ for s=[1]
 %             fgName=out_fg;
 %             out_fg=fatSegmentConnectomeMRtrix3(fatDir, anatDir, anatid(s), sessid{s}, runName{r}, fgName)
 %         end
-        
+%         
         %10) Optional: Clean Connectome with AFQ
         if cleanConnectome >0
             for r=1:length(runName)
-                
-              %  fgName=out_fg;
-              fgName='/share/kalanit/biac2/kgs/projects/NFA_tasks/data_mrAuto/01_sc_dti_mrTrix3_080917/96dir_run1_noFW/dti96trilin/fibers/afq/lh_OTS_from_fsaverage_manual_FG_masked_classified.mat'
-                out_fg=fatCleanConnectomeMRtrix3(fatDir, anatDir, anatid(s), sessid{s}, runName{r}, fgName)
+                %fgName=out_fg;
+                fgName=fullfile('/share/kalanit/biac2/kgs/projects/NFA_tasks/data_mrAuto',sessid{s},'96dir_run1_noFW/dti96trilin/fibers/afq/lh_OTS_from_fsaverage_manual_FG_masked_classified.mat')
+                out_fg=fatCleanConnectomeMRtrix3Prediction(fatDir, anatDir, anatid(s), sessid{s}, runName{r}, fgName)
             end
         end
         
@@ -165,7 +164,9 @@ for s=[1]
                     hem='rh'
                     foi=[12 14 16 20 28 22];
                 end
+                out_fg='lh_OTS_from_fsaverage_manual_FG_masked_classified_cleaner.mat'
                 fatRenderFibersWholeConnectome(fatDir, sessid{s}, runName{r}, out_fg, foi,t1_name, hem)
+                close all;
             end
         end
         

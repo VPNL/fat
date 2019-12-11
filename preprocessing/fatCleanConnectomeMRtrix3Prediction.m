@@ -59,8 +59,39 @@ if rmOutlier
                     fg_clean(ii+8).fibers{size+1,1}=fg_classified(ii).fibers{x,1};
                 end
             end
-        end
         
+        elseif ii==15
+            
+            cnt=0;
+            fg_clean(ii).fibers={};
+            [SuperFiber] = dtiComputeSuperFiberRepresentation(fg_classified(ii+4), [], numNodes, 'mean'); %find the core of the AF
+            
+            for x=1:length(fg_classified(ii).fibers)
+                if (min(fg_classified(ii).fibers{x,1}(3,:)))>=(min(SuperFiber.fibers{1,1}(3,:))+20) %if min of SLF is too close to min of AF count as AF istead
+                    cnt=cnt+1;
+                    fg_clean(ii).fibers{cnt,1}=fg_classified(ii).fibers{x,1};
+                else
+                    size=length(fg_clean(ii+4).fibers);
+                    fg_clean(ii+4).fibers{size+1,1}=fg_classified(ii).fibers{x,1};
+                end
+            end
+            
+        elseif ii==16
+            
+            cnt=0;
+            fg_clean(ii).fibers={};
+            [SuperFiber] = dtiComputeSuperFiberRepresentation(fg_classified(ii+4), [], numNodes, 'mean'); %find the core of the AF
+            
+            for x=1:length(fg_classified(ii).fibers)
+                if (min(fg_classified(ii).fibers{x,1}(3,:)))>=(min(SuperFiber.fibers{1,1}(3,:))+20) %if min of SLF is too close to min of AF count as AF istead
+                    cnt=cnt+1;
+                    fg_clean(ii).fibers{cnt,1}=fg_classified(ii).fibers{x,1};
+                else
+                    size=length(fg_clean(ii+4).fibers);
+                    fg_clean(ii+4).fibers{size+1,1}=fg_classified(ii).fibers{x,1};
+                end
+            end
+        end
         
         maxDist = 4; maxLen = 4; numNodes = 100; M = 'mean'; maxIter = 200; count = true; show=false;
         

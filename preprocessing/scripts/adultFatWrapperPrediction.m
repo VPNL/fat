@@ -66,86 +66,86 @@ cleanConnectome = 1; % do you want to clean the connectome with AFQ? Enter 1 or 
 generatePlots =1; % do you want to generates some simple plots of fiber tracts for quality assurance? Enter 1 or 0
 roi='lh_OTS_from_fsaverage_manual'; % will be used as masked for seeding. Use [] if you don't want a mask.
 
-for s=1:30
+for s=6
     for r=1:length(runName)
         % %The following parameters need to be adjusted to fit your system
-%         anatDir_system_current=fullfile(anatDir_system, anatid{s});
-%         anatDir_system_output=fullfile('/biac2/kgs/projects/NFA_tasks/data_mrAuto/', sessid{s}, runName{r}, 't1');
-%         
-%         %here we go
-%         %1) Organize the data
-%         fatPrepareMRtrix3(fatDir,sessid{s}, anatDir_system_current, anatDir_system_output, r)
-%         cmdstr=['cp ' fullfile(fatDir, 'dwiSlSpec.txt') ' ' fullfile(fatDir, sessid{s}, runName{r}, 'dwiSlSpec.txt')];
-%         system(cmdstr)
-%         cmdstr=['cp ' fullfile(fatDir, 'run1_Xflip_corrected.bvec') ' ' fullfile(fatDir, sessid{s}, runName{r}, 'raw/run1.bvec')];
-%         system(cmdstr)
-%         
-%         %2) Preprocess the data using mrTrix3
-%         %--> After this step check that dwi_processed.nii.gz looks ok
-%         fatPreProcMRtrix3Nii(fatDir,sessid{s},runName{r},revPhase,doDenoise,doGibbs,doEddy,doBiasCorr,doRicn)
-%         
-%         %3) The preprocessing messes with the nifti header, we need to
-%         % fix this.
-%         nii=niftiRead(fullfile(fatDir,sessid{s},runName{r},'dwi_processed.nii.gz'));
-%         nii.phase_dim=2;
-%         niftiWrite(nii,fullfile(fatDir,sessid{s},runName{r},'dwi_processed.nii.gz'));
-%         
-%         %4) Initiate a dt.mat data structure
-%         % --> After this step, check that t1 and dwi were aligned properly
-%         [dt6folder, dt6file]=fatCreateDT6(fatDir,sessid(s),runName(r),t1_name,clobber);
-%         
-%         %5) Create a good wm mask using FreeSurfer Segmentation
-%         %--> After this step check that wmMask_from_FreeSurfer.nii.gz in mrtrix folder looks ok
-%         mkdir(fullfile(fatDir,sessid{s},runName{r},'dti96trilin','mrtrix'));
-%         fatMakeWMmask(fatDir, anatDir_system, anatid(s), sessid(s),runName{r},t1_name,'wm', 1)
-%         cmd_str=['mrconvert ' fullfile(anatDir_system, anatid{s},'wm_mask_resliced.nii.gz') ' ' fullfile(fatDir,sessid{s},runName{r},dt6folder.name,'mrtrix','wmMask_from_FreeSurfer.nii.gz')]
-%         AFQ_mrtrix_cmd(cmd_str,background, verbose,mrtrixversion)
-%         
-%         %6) Set up tractography for mrtrix 3
-%         %--> After this step check that dwi_[...]_wmCSD_lmax_auto.mif looks
-%         %ok. You probably also want to check the other files in the mrtrix folder, especially:
-%         %dwi_[...]_ev.mif, dwi_[...]_5tt.mif, dwi_[...]_ev.mif, dwi_[...]_vf.mif and dwi_[...]_voxels.mif
-%         anatFolder=fullfile(fsDir,anatid{s},'mri');
-%         files = fat_AFQ_mrtrixInit(dt6file, ...
-%             fullfile(fatDir,sessid{s},runName{r},dt6folder.name,'mrtrix'),...
-%             mrtrixversion, ...
-%             multishell, ... % true/false
-%             track_tool,... % 'fsl', 'freesurfer'
-%             1,...
-%             anatFolder);
-%         
-%         %7) Create connectomes
-%         %--> After this step check that connectome looks ok
-%         fatMakefsROI(anatDir,anatid{s},sessid{s},1) % first create the ROIs needed for AFQ using freesurfer
-%         roiPath=fullfile(anatDir,anatid{s},'niftiRois');
-%         [status, results, out_fg] = fatCreateConnectomeMRtrix3ACT(fullfile(fatDir,sessid{s},runName{r},dt6folder.name),...
-%             files, ...
-%             algo, ...
-%             seeding, ...
-%             nSeeds, ...
-%             background, ...
-%             verbose, ... %verbose
-%             clobber, ... %clobber
-%             mrtrixversion, ...
-%             ET, ...
-%             roiPath,...
-%             roi);
-%         
-%         %8) Optional: Run LiFE to optimize the ET connectome
-%         if runLife > 0
-%             fgname=out_fg;
-%             out_fg=fatRunLifeMRtrix3(fatDir, sessid{s}, runName{r},fgname,t1_name);
-%         end
-%         
-%         %9) Optional: Run AFQ to classify the fibers
-%         if classifyConnectome >0
-%             fatMakefsROI(anatDir,anatid{s},sessid{s},1) % first create the ROIs needed for AFQ using freesurfer
-%             
-%             fgName=out_fg;
-%             out_fg=fatSegmentConnectomeMRtrix3(fatDir, anatDir, anatid(s), sessid{s}, runName{r}, fgName)
-%         end
-%         
-        %10) Optional: Clean Connectome with AFQ
+        anatDir_system_current=fullfile(anatDir_system, anatid{s});
+        anatDir_system_output=fullfile('/biac2/kgs/projects/NFA_tasks/data_mrAuto/', sessid{s}, runName{r}, 't1');
+        
+        %here we go
+        %1) Organize the data
+        fatPrepareMRtrix3(fatDir,sessid{s}, anatDir_system_current, anatDir_system_output, r)
+        cmdstr=['cp ' fullfile(fatDir, 'dwiSlSpec.txt') ' ' fullfile(fatDir, sessid{s}, runName{r}, 'dwiSlSpec.txt')];
+        system(cmdstr)
+        cmdstr=['cp ' fullfile(fatDir, 'run1_Xflip_corrected.bvec') ' ' fullfile(fatDir, sessid{s}, runName{r}, 'raw/run1.bvec')];
+        system(cmdstr)
+        
+        %2) Preprocess the data using mrTrix3
+        %--> After this step check that dwi_processed.nii.gz looks ok
+        fatPreProcMRtrix3Nii(fatDir,sessid{s},runName{r},revPhase,doDenoise,doGibbs,doEddy,doBiasCorr,doRicn)
+        
+        %3) The preprocessing messes with the nifti header, we need to
+        % fix this.
+        nii=niftiRead(fullfile(fatDir,sessid{s},runName{r},'dwi_processed.nii.gz'));
+        nii.phase_dim=2;
+        niftiWrite(nii,fullfile(fatDir,sessid{s},runName{r},'dwi_processed.nii.gz'));
+        
+        %4) Initiate a dt.mat data structure
+        % --> After this step, check that t1 and dwi were aligned properly
+        [dt6folder, dt6file]=fatCreateDT6(fatDir,sessid(s),runName(r),t1_name,clobber);
+        
+        %5) Create a good wm mask using FreeSurfer Segmentation
+        %--> After this step check that wmMask_from_FreeSurfer.nii.gz in mrtrix folder looks ok
+        mkdir(fullfile(fatDir,sessid{s},runName{r},'dti96trilin','mrtrix'));
+        fatMakeWMmask(fatDir, anatDir_system, anatid(s), sessid(s),runName{r},t1_name,'wm', 1)
+        cmd_str=['mrconvert ' fullfile(anatDir_system, anatid{s},'wm_mask_resliced.nii.gz') ' ' fullfile(fatDir,sessid{s},runName{r},dt6folder.name,'mrtrix','wmMask_from_FreeSurfer.nii.gz')]
+        AFQ_mrtrix_cmd(cmd_str,background, verbose,mrtrixversion)
+        
+        %6) Set up tractography for mrtrix 3
+        %--> After this step check that dwi_[...]_wmCSD_lmax_auto.mif looks
+        %ok. You probably also want to check the other files in the mrtrix folder, especially:
+        %dwi_[...]_ev.mif, dwi_[...]_5tt.mif, dwi_[...]_ev.mif, dwi_[...]_vf.mif and dwi_[...]_voxels.mif
+        anatFolder=fullfile(fsDir,anatid{s},'mri');
+        files = fat_AFQ_mrtrixInit(dt6file, ...
+            fullfile(fatDir,sessid{s},runName{r},dt6folder.name,'mrtrix'),...
+            mrtrixversion, ...
+            multishell, ... % true/false
+            track_tool,... % 'fsl', 'freesurfer'
+            1,...
+            anatFolder);
+        
+        %7) Create connectomes
+        %--> After this step check that connectome looks ok
+        fatMakefsROI(anatDir,anatid{s},sessid{s},1) % first create the ROIs needed for AFQ using freesurfer
+        roiPath=fullfile(anatDir,anatid{s},'niftiRois');
+        [status, results, out_fg] = fatCreateConnectomeMRtrix3ACT(fullfile(fatDir,sessid{s},runName{r},dt6folder.name),...
+            files, ...
+            algo, ...
+            seeding, ...
+            nSeeds, ...
+            background, ...
+            verbose, ... %verbose
+            clobber, ... %clobber
+            mrtrixversion, ...
+            ET, ...
+            roiPath,...
+            roi);
+        
+        %8) Optional: Run LiFE to optimize the ET connectome
+        if runLife > 0
+            fgname=out_fg;
+            out_fg=fatRunLifeMRtrix3(fatDir, sessid{s}, runName{r},fgname,t1_name);
+        end
+        
+        %9) Optional: Run AFQ to classify the fibers
+        if classifyConnectome >0
+            fatMakefsROI(anatDir,anatid{s},sessid{s},1) % first create the ROIs needed for AFQ using freesurfer
+            
+            fgName=out_fg;
+            out_fg=fatSegmentConnectomeMRtrix3(fatDir, anatDir, anatid(s), sessid{s}, runName{r}, fgName)
+        end
+        
+        10) Optional: Clean Connectome with AFQ
         if cleanConnectome >0
             for r=1:length(runName)
                 %fgName=out_fg;
@@ -159,14 +159,14 @@ for s=1:30
             for hem=1
                 if hem==1
                     hem='lh'
-                    foi=[11 13 15 19 27 21];
+                    foi=[11 13 21 19 27 17];
                 else
                     hem='rh'
                     foi=[12 14 16 20 28 22];
                 end
-                out_fg='lh_OTS_from_fsaverage_manual_FG_masked_classified_cleaner.mat'
+                out_fg='lh_OTS_from_fsaverage_manual_FG_masked_classified_clean.mat'
                 fatRenderFibersWholeConnectome(fatDir, sessid{s}, runName{r}, out_fg, foi,t1_name, hem)
-                close all;
+                %close all;
             end
         end
         

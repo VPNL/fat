@@ -98,7 +98,7 @@ if doEddy>0
         
         diffEddy=fullfile(fatDir, sessid, runName, strcat(diffName, '_eddy.nii.gz'));
         MASK=fullfile(fatDir, sessid, runName, 'dwi_b0_brain_mask.nii.gz');
-        cmd_str = ['dwipreproc -eddy_options " --mporder=3 --slspec=./dwiSlSpec.txt --mask=' MASK ' --repol --data_is_shelled --slm=linear" -rpe_none -pe_dir PA ' strcat(diffName,'.nii.gz') ' -fslgrad ' bvec ' ' bval ' ' diffEddy ' -eddyqc_text ' OutDir ' -tempdir ./tmp -quiet'];
+        cmd_str = ['dwipreproc -eddy_options " --mporder=3 --slspec=./dwiSlSpec.txt --mask=' MASK ' --repol --data_is_shelled --slm=linear --cnr_maps --residuals" -rpe_none -pe_dir PA ' strcat(diffName,'.nii.gz') ' -fslgrad ' bvec ' ' bval ' ' diffEddy ' -eddyqc_text ' OutDir ' -tempdir ./tmp -quiet'];
         [status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
         diffName=strcat(diffName, '_eddy');
         
@@ -152,7 +152,7 @@ if doEddy>0
         system(cmdstr)
         
         cmdstr=['eddy_cuda9.1 --imain=' strcat(diffMSName, '_even') ' --mask=topup_b0_out_brain_mask --acqp=acq_params.txt --index=index.txt',...
-            ' --bvecs=' bvecMS ' --bvals=' bvalMS ' --topup=topup --out=' strcat(diffMSName, '_unwarped_eddy') ' --repol --data_is_shelled']
+            ' --bvecs=' bvecMS ' --bvals=' bvalMS ' --topup=topup --out=' strcat(diffMSName, '_unwarped_eddy') ' --repol --data_is_shelled --cnr_maps --residuals']
         system(cmdstr)
         
         diffName=strcat(diffMSName, '_unwarped_eddy');
@@ -173,14 +173,18 @@ if doBiasCorr>0
         bvec=bvecMS;
         bval=bvalMS;
     end
-    cmd_str = ['dwibiascorrect -mask ' MASK ' -ants '  strcat(diffName,'.nii.gz') ' -fslgrad ' bvec ' ' bval ' ' diffBias ' -force -tempdir ./tmp -quiet'];
-    [status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+%     cmd_str = ['dwibiascorrect -mask ' MASK ' -ants '  strcat(diffName,'.nii.gz') ' -fslgrad ' bvec ' ' bval ' ' diffBias ' -force -tempdir ./tmp -quiet'];
+%     [status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+%     
+%     if ~exist(strcat(diffName, '_bias.nii.gz'));
+%         warning('Dwibiascorrect failed when using the -ants option. Using -fsl option instead.');
+%         cmd_str = ['dwibiascorrect -mask ' MASK ' -fsl '  strcat(diffName,'.nii.gz') ' -fslgrad ' bvec ' ' bval ' ' diffBias ' -force -tempdir ./tmp -quiet'];
+%         [status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+%     end
     
-    if ~exist(strcat(diffName, '_bias.nii.gz'));
-        warning('Dwibiascorrect failed when using the -ants option. Using -fsl option instead.');
+        warning('Dwibiascorrect is using the -fsl option. This is not recommended, by the ANTS option fails after advanced motion correction.');
         cmd_str = ['dwibiascorrect -mask ' MASK ' -fsl '  strcat(diffName,'.nii.gz') ' -fslgrad ' bvec ' ' bval ' ' diffBias ' -force -tempdir ./tmp -quiet'];
         [status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
-    end
     diffName=strcat(diffName, '_bias');
 end
 

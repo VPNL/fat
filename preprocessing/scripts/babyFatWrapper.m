@@ -2,7 +2,7 @@
 %Diffusion tool combine Vistasoft, MRtrix, LiFE and AFQ to produce functional defined fasciculus.
 %It requires these toolboxs installed, and also required the fROI defined by vistasoft.
 %In oder for this code to run, you will likely need to upgrade several
-%software packages, specifically this code was tested using: MRtrix RC3,
+%software packages, specifically this code wa9afstys tested using: MRtrix RC3,
 %fslv6.0.1, ANTs from 2017, AFQ from 2019, cuda9.1, and freesurferv6.0.0. Please note that
 %running older version will lead to subtly inoptimal results. I made a few
 %suggestions which outputs to ckeck for qulity assurance. You can do sou

@@ -26,7 +26,7 @@ end
 
 %% Load and plot whole brain fiber
 % Load ensemble connectome
-wholeBrainfgFile = fullfile(runDir,'fibers',strcat(fgNameWoExt, '.mat'));
+wholeBrainfgFile = fullfile(runDir,'fibers', strcat(fgNameWoExt, '.mat'));
 
 wholebrainFG = fgRead(wholeBrainfgFile);
 %% classified the fibers
@@ -34,7 +34,7 @@ wholebrainFG = fgRead(wholeBrainfgFile);
 dt = dtiLoadDt6(fullfile(runDir,'dt6.mat'));
 
 % Segment the whole-brain fiber group into 20 fiber tracts
-fg_classified = AFQ_SegmentFiberGroups(dt, wholebrainFG,...
+[fg_classified,fg_unclassified,classification,fg] = AFQ_SegmentFiberGroups(dt, wholebrainFG,...
     'MNI_JHU_tracts_prob.nii.gz',useRoiBasedApproach);
 clear wholebrainFG
 
@@ -44,7 +44,10 @@ fg_classified = fg2Array(fg_classified);
 %% Identify VOF and pAF
 fsROIdir = fullfile(anatDir,anatid,'fsROI');
 [L_VOF, R_VOF, L_pAF, R_pAF, L_pAF_vot, R_pAF_vot] = AFQ_FindVOF(wholeBrainfgFile,...
-    fg_classified(19),fg_classified(20),fsROIdir{1},afqDir,[],[],dt);
+   fg_classified(19),fg_classified(20),fsROIdir{1},afqDir,[],[],dt);
+
+%[L_VOF, R_VOF, L_pAF, R_pAF, L_pAF_vot, R_pAF_vot] = AFQ_FindVOF(wholeBrainfgFile,...
+%    fg_classified(19),fg_classified(20),fsROIdir,afqDir,[],[],dt);
 
 fg_classified(21) = L_VOF;
 
@@ -146,10 +149,16 @@ catch
 end
 
 % save file
-fgFile = fullfile(afqDir, [fgNameWoExt, '_classified.mat']);
+fgFile_classified = fullfile(afqDir, [fgNameWoExt, '_classified.mat']);
 S.fg = fg_classified;
-save(fgFile,'-struct','S');
+save(fgFile_classified,'-struct','S');
+
+% save unclassified fibers 
+fgFile_unclassified = fullfile(afqDir, [fgNameWoExt,'_unclassified.mat']);
+S.fg = fg_unclassified;
+save(fgFile_unclassified,'-struct','S');
+ 
 clear S;
-        
+
 end
 

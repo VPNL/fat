@@ -15,6 +15,7 @@ if ~exist(afqDir, 'dir')
     mkdir(afqDir);
 end
 
+cd(afqDir)
 %% Load and plot whole brain fiber
 % Load ensemble connectome
 fgFile = fullfile(fgName);

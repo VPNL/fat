@@ -1,4 +1,4 @@
-function fatMakefsROI(anatDir,anatid,sessid,force)
+function fatMakefsROI(anatDir,anatid,fsid, sessid,force)
 % fatMakefsROI(fatDir,sessid,force)
 % use fs_roisFromAllLabels(fsIn,outDir,type,refT1)
 % to convert the freesurfer segmentation into ,mat ROIs
@@ -8,7 +8,7 @@ fsDir   = getenv('SUBJECTS_DIR');
 
     % data info
     fsROIdir = fullfile(anatDir,anatid,'fsROI');
-    fsIn = fullfile(fsDir,anatid,'mri','aparc+aseg.mgz');
+    fsIn = fullfile(fsDir,fsid,'mri','aparc+aseg.mgz');
     refT1 = fullfile(anatDir,anatid,'t1.nii.gz');
     if ~exist(fsROIdir,'dir') || force
         fprintf('Make fsROI for %s\n', sessid);

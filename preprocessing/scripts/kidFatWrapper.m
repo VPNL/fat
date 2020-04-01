@@ -11,19 +11,23 @@
 
 % The following parameters need to be adjusted to fit your system
 %% Paths for child subjects 
-fatDir=fullfile('/share/kalanit/biac2/kgs/projects/Kids_AcrossYears/dMRI/data');
+fatDir=fullfile('/share/kalanit/biac2/kgs/projects/Kids_AcrossYears/dMRI/Test');
 anatDir_system = fullfile('/share/kalanit/biac2/kgs/anatomy/vistaVol/Kids_AcrossYears');
 anatDir = fullfile('/share/kalanit/biac2/kgs/anatomy/vistaVol/Kids_AcrossYears');
 fsDir =('/share/kalanit/biac2/kgs/anatomy/freesurferRecon/Kids_AcrossYears');
 
 
 % Get the sessions to process
-[sessid, anatid, fsid] = getSubDirs;
+%[sessid, anatid, fsid] = getSubDirs;
+sessid = {'AOK07/IFOD1_ET/AOK07_140810_time01_1'}
+anatid = {'AOK07/AOK07_avg123'};
+fsid = {'AOK07_avg123'};
+
 
 % allocation for ianthe 
-sessid = sessid(1:30);
-anatid = anatid(1:30);
-fsid = fsid(1:30);
+%sessid = sessid(1:30);
+%anatid = anatid(1:30);
+%fsid = fsid(1:30);
 
 %allocation for seele
 %sessid = sessid(31:60);
@@ -96,7 +100,7 @@ for s=1:length(sessid)
         %5) Create a good wm mask using FreeSurfer Segmentation
         %--> After this step check that wmMask_from_FreeSurfer.nii.gz in mrtrix folder looks ok
         mkdir(fullfile(fatDir,sessid{s},runName{r},'dti96trilin','mrtrix'));
-        fatMakeWMmask(fatDir, anatDir_system, anatid(s), sessid(s), fsid{s}, runName{r},t1_name,'wm', 1)
+        fatMakeWMmask(fatDir, anatDir_system, anatid(s), sessid(s), fsid(s), runName{r},t1_name,'wm', 1)
         cmd_str=['mrconvert ' fullfile(fatDir, sessid{s},runName{r},'wm_mask_resliced.nii.gz') ' ' fullfile(fatDir,sessid{s},runName{r},dt6folder.name,'mrtrix','wmMask_from_FreeSurfer.nii.gz')]
         AFQ_mrtrix_cmd(cmd_str,background, verbose,mrtrixversion)
         
@@ -130,12 +134,17 @@ for s=1:length(sessid)
             roiPath,...
             roi);
         
-        %8) Run LiFE to optimize the ET connectome
+        %8) Write out WholeBrain .tck as .mat
+        fg = fgRead(fullfile(fatDir,sessid{s},runName{r},'dti96trilin','fibers','WholeBrainFGRadSe.tck'));
+        outname = fullfile(fatDir,sessid{s},runName{r},'dti96trilin','fibers','WholeBrainFGRadSe.mat');
+        fgWrite(fg, outname)
+        
+        %9) Run LiFE to optimize the ET connectome
         if runLife > 0
             out_fg=fatRunLifeMRtrix3(fatDir, sessid{s}, runName{r},'WholeBrainFGRadSe.mat',t1_name);
         end
         
-        %9) Run AFQ to classify the fibers (both WholeBrain + LiFE
+        %10) Run AFQ to classify the fibers (both WholeBrain + LiFE
         %connectomes)
         if classifyConnectome >0
             fatMakefsROI(anatDir,anatid{s},fsid{s},sessid{s},1) % first create the ROIs needed for AFQ using freesurfer

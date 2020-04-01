@@ -1,9 +1,9 @@
-function  fatRenderFibersWholeConnectome(fatDir, sessid, runName, fgName,foi,t1name,hemi,colorMap)
+function  fatRenderFibersWholeConnectome(fatDir, sessid, runName, fgName,foi,t1name,hemi,numfibers,colorMap)
 %  fatRenderFibers(fatDir, sessid, runName, fgName, hemi)
 % fgName: full name of fg including path and postfix
 % foi, a vector to indicate fiber of interest
 % hemi, 'rh' or 'lh'
-if nargin < 8 
+if nargin < 9
     colorMap = [0 0.8 0.8; 1 0.5 1; 0.45 0 0.45; 1 0 0; 1 0.6 0; 0.6 1 0.05]; 
 end
 
@@ -18,7 +18,9 @@ else strcmp(hemi,'rh')
 end
 zplane = [0, 0, -10];
 
- 
+if nargin < 8 
+     numfibers = 50;
+end 
 
 
 % colorMap  = linspecer(length(foi));
@@ -26,7 +28,7 @@ zplane = [0, 0, -10];
 
 % set criteria
 maxDist = 4; maxLen = 4;numNodes = 100;M = 'mean';maxIter = 200;count = false;
-numfibers = 50;
+%numfibers = 50;
         fprintf('Plot fiber %s-%s:%s\n',sessid,runName,fgName);
         
         cd(fullfile(fatDir,sessid,runName))

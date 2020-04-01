@@ -1,4 +1,4 @@
-function fatMakeWMmask(fatDir, anatDir, anatid, sessid, runName, t1_name, ventMeth, force)
+function fatMakeWMmask(fatDir, anatDir, anatid, sessid, fsid, runName, t1_name, ventMeth, force)
 % fatMakeWMmask(fatDir, anatid, ventMeth, force)
 % ventMeth: method to generate ventricle mask
 % This function will do:
@@ -33,14 +33,14 @@ for s = 1:length(anatid)
         
         % generate T1_ventQRM_1mm through aseg.mgz
         if strcmp(ventMeth, 'aseg')
-            asegFile = fullfile(subdir, anatid{s}, 'mri', 'aseg.mgz');
+            asegFile = fullfile(subdir, fsid{s}, 'mri', 'aseg.mgz');
             ventID = '4 5 14 15 43 44 72';
             bincmd = sprintf('mri_binarize --i %s --o %s --match %s',...
                 asegFile, ventFS, ventID);
             
             % generate T1_ventQRM_1mm through wm.mgz
         elseif strcmp(ventMeth, 'wm')
-            wmFile = fullfile(subdir, anatid{s}, 'mri', 'wm.mgz');
+            wmFile = fullfile(subdir, fsid{s}, 'mri', 'wm.mgz');
             bincmd = sprintf('mri_binarize --i %s --min 240 --o %s',...
                 wmFile, ventFS);
             
@@ -107,9 +107,9 @@ for s = 1:length(anatid)
         % and that it is of the same nifti size. We will use the wmProb mab in the
         % bin folder to align to. This requires the fat data to have been
         % preprocessed.
-        refVol = fullfile(fatDir, sessid{s},runName,'dwi_processed_b0_brainmask.nii.gz');
+        refVol = fullfile(fatDir, sessid{s},runName,'dwi_b0_brain_mask.nii.gz');
         if ~exist(refVol, 'file')
-            fprintf('%s: dwi_processed_b0_brainmask.nii.gz does not exist\n', anatid{s})
+            fprintf('%s: dwi_b0_brain_mask.nii.gz does not exist\n', anatid{s})
             continue
         end
         

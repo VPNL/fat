@@ -15,15 +15,22 @@ fatDir=fullfile('/share/kalanit/biac2/kgs/projects/Kids_AcrossYears/dMRI/Test');
 anatDir_system = fullfile('/share/kalanit/biac2/kgs/anatomy/vistaVol/Kids_AcrossYears');
 anatDir = fullfile('/share/kalanit/biac2/kgs/anatomy/vistaVol/Kids_AcrossYears');
 fsDir =('/share/kalanit/biac2/kgs/anatomy/freesurferRecon/Kids_AcrossYears');
-
+figDir = ('/share/kalanit/biac2/kgs/projects/Kids_AcrossYears/dMRI/code/preprocessing/figures');
 
 % Get the sessions to process
 %[sessid, anatid, fsid] = getSubDirs;
-sessid = {'AOK07/IFOD1_ET/AOK07_140810_time01_1'}
-anatid = {'AOK07/AOK07_avg123'};
-fsid = {'AOK07_avg123'};
+%sessid = {'AOK07/IFOD1_ET/AOK07_140810_time01_1'}
+%anatid = {'AOK07/AOK07_avg123'};
+%fsid = {'AOK07_avg123'};
 
+sessid = {'STM10/STM10_181215_time02_1'};
+%sessid = {'STM10/STM10_190817_time03_1'};
+anatid = {'STM10/STM10avg_12'};
+fsid = {'STM10avg_12'};
 
+%sessid = {'RHSA06/RHSA06_IFOD1_ET/RHSA06_180805_time_03_1'};
+%anatid = {'RHSA06/RHSA06avg_123'};
+%fsid = {'RHSA06avg_123'};
 % allocation for ianthe 
 %sessid = sessid(1:30);
 %anatid = anatid(1:30);
@@ -96,6 +103,11 @@ for s=1:length(sessid)
         %4) Initiate a dt.mat data structure
         % --> After this step, check that t1 and dwi were aligned properly
         [dt6folder, dt6file]=fatCreateDT6(fatDir,sessid(s),runName(r),t1_name,clobber);
+        
+        % save alignment figure 
+        [~,remain] = strtok(sessid{s},'/');
+        [sess,~] = strtok(remain,'/');
+        saveas(gcf,fullfile(figDir,'alignment',strcat(sess,'.png')))
              
         %5) Create a good wm mask using FreeSurfer Segmentation
         %--> After this step check that wmMask_from_FreeSurfer.nii.gz in mrtrix folder looks ok

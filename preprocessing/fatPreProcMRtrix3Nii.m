@@ -99,7 +99,8 @@ if doEddy>0
         diffEddy=fullfile(fatDir, sessid, runName, strcat(diffName, '_eddy.nii.gz'));
         MASK=fullfile(fatDir, sessid, runName, 'dwi_b0_brain_mask.nii.gz');
         cmd_str = ['dwipreproc -eddy_options " --mporder=3 --slspec=./dwiSlSpec.txt --mask=' MASK ' --repol --data_is_shelled --slm=linear --cnr_maps --residuals" -rpe_none -pe_dir PA ' strcat(diffName,'.nii.gz') ' -fslgrad ' bvec ' ' bval ' ' diffEddy ' -eddyqc_text ' OutDir ' -tempdir ./tmp -quiet'];
-        [status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
+        system(cmd_str)
+        %[status,results] = AFQ_mrtrix_cmd(cmd_str, bkgrnd, verbose,mrtrixVersion);
         diffName=strcat(diffName, '_eddy');
         
         fatPlotMotion('eddy_movement_over_time','On');

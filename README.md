@@ -1,6 +1,6 @@
 ﻿Diffusion tool box that combines Vistasoft, MRtrix3, LiFE and AFQ to produce white matter connectomes. It requires the toolboxes mentioned before to be installed. The pipeline is orgnized as below. 
  
-A great place to start exploring this pipeline is the script "fat/preprocessing/scripts/fatPreprocmrTrix3WrapperLocal.m", which includes the entire pipeline from raw dti data to connetomes. Please note that this pipeline does not currently include resverse phase encoding correction, and that the mutishell code has never been tested. The pipeline is organized as follows:
+A great place to start exploring this pipeline is the script "fat/preprocessing/scripts/fatPreprocmrTrix3WrapperLocal.m", which includes the entire pipeline from raw dti data to connetomes. The pipeline is organized as follows:
 
 
 1) Prepare fat data and directory structure

@@ -1,0 +1,87 @@
+
+%This code is an example of how to use babyAFQ in order to delinate a
+%whole brain connectome into white matter bundles
+% it requires SPM as well as AFQ, which can be found on GitHub: https://github.com/yeatmanlab/AFQ
+
+% The following parameters need to be adjusted to fit your system
+demoDir=fullfile('/share/kalanit/biac2/kgs/projects/babybrains/mri/babyAFQ_demo');
+sessid={'exampleData'}
+
+runName={'94dir_run1'};
+t1_name=['t2_biascorr_acpc.nii.gz'];
+fgNameBaby='WholeBrainFG';
+babyAFQRoiDir=fullfile(fatDir, sessid{s}, runName{r},'dti94trilin','babyAFQROIs');
+out_fg=babyFatSegmentConnectomeMRtrix3(fatDir, babyAFQRoiDir, sessid{s}, runName{r}, strcat(fgNameBaby,'.mat'))
+
+        fgNameBaby=strcat(fgNameBaby,'_classified_withBabyAFQ');
+        out_fg=fatCleanConnectomeMRtrix3(fatDir, sessid{s}, runName{r}, strcat(fgNameBaby,'.mat'))
+        fgNameBaby=strcat(fgNameBaby,'_clean');
+
+
+%10 Optional: Generate a few plots for quality assurance
+fgNameBaby='WholeBrainFG_classified_withBabyAFQ_clean'
+
+% colors=load('/home/grotheer/babybrains/mri/code/babyAFQ/colors.txt')
+colorsBaby=load('/share/kalanit/biac2/kgs/projects/babybrains/mri/code/babyAFQ/colorsBaby.txt')
+if useBabyAFQ>0
+    colors=colorsBaby;
+    if generatePlots >0
+        %cmd_str=['rm -r ' fullfile(fatDir, sessid{s}, runName{r}, 'dti94trilin/fibers/afq/image')]
+        %system(cmd_str);
+        tract_names={'TR' 'TR' 'CS' 'CS' 'CC' 'CC' 'CH' 'CH',...
+            'FMa' 'FMi' 'IFOF' 'IFOF' 'ILF' 'ILF' 'SLF' 'SLF',...
+            'UCI' 'UCI' 'AF' 'AF' 'MdLF' 'MdLF' 'VOF' 'VOF' 'pAF' 'pAF',...
+            'pAF_VOT' 'pAF_VOT' 'pAF_sum' 'pAF_sum'}
+        
+        for foi=[1:26]
+            if rem(foi,2)==0
+                hem='rh'
+                h=2;
+                color=colors(foi,:)
+            else
+                hem='lh'
+                h=1;
+                color=colors(foi+1,:)
+            end
+            
+            if strcmp(tract_names{foi},'TR')
+                ROIs= {'ATR_roi1_L.mat',  'ATR_roi2_L.mat', 'ATR_roi3_L.mat'; 'ATR_roi1_R.mat', 'ATR_roi2_R.mat', 'ATR_roi3_R.mat'};
+            elseif strcmp(tract_names{foi},'CS')
+                ROIs={'CST_roi1_L.mat', 'CST_roi2_L.mat'; 'CST_roi1_R.mat',  'CST_roi2_R.mat'};
+            elseif strcmp(tract_names{foi},'CC')
+                ROIs={'CGC_roi1_L.mat', 'CGC_roi2_L.mat'; 'CGC_roi1_R.mat', 'CGC_roi2_R.mat'};
+            elseif strcmp(tract_names{foi},'CH')
+                ROIs={'HCC_roi1_L.mat', 'HCC_roi2_L.mat'; 'HCC_roi1_R.mat', 'HCC_roi2_R.mat'};
+            elseif strcmp(tract_names{foi},'FMa')
+                ROIs={'FP_R.mat', 'FP_L.mat'; 'FP_R.mat', 'FP_L.mat'; };
+            elseif strcmp(tract_names{foi},'FMi')
+                ROIs={'FA_R.mat', 'FA_L.mat'; 'FA_R.mat', 'FA_L.mat'};
+            elseif strcmp(tract_names{foi},'IFOF')
+                ROIs={'IFO_roi1_L.mat', 'IFO_roi2_L.mat', 'IFO_roi3_L.mat' ; 'IFO_roi1_R.mat', 'IFO_roi2_R.mat', 'IFO_roi3_R.mat'};
+            elseif strcmp(tract_names{foi},'ILF')
+                ROIs={'ILF_roi1_L.mat', 'ILF_roi2_L.mat'; 'ILF_roi1_R.mat', 'ILF_roi2_R.mat'};
+            elseif strcmp(tract_names{foi},'SLF')
+                ROIs={'SLF_roi1_L.mat', 'SLF_roi2_L.mat'; 'SLF_roi1_R.mat', 'SLF_roi2_R.mat'};
+            elseif strcmp(tract_names{foi},'UCI')
+                ROIs={ 'UNC_roi1_L.mat', 'UNC_roi2_L.mat', 'UNC_roi3_L.mat' ; 'UNC_roi1_R.mat', 'UNC_roi2_R.mat', 'UNC_roi3_R.mat'};
+            elseif strcmp(tract_names{foi},'AF')
+                ROIs={ 'SLF_roi1_L.mat', 'SLFt_roi2_L.mat', 'SLFt_roi3_L.mat'; 'SLF_roi1_R.mat', 'SLFt_roi2_R.mat', 'SLFt_roi3_R.mat'};
+            elseif strcmp(tract_names{foi},'MdLF')
+                ROIs={ 'MdLF_roi1_L.mat', 'ILF_roi2_L.mat'; 'MdLF_roi1_R.mat','ILF_roi2_R.mat'};
+            else ROIs=[];
+            end
+            
+            %outname=strcat(tract_names{foi},'_',subject,'_',age,'_',fgName)
+            outname=strcat(hem,'_',tract_names{foi},'_',fgNameBaby,'_withROIs')
+            roiDir='babyAFQROIs';
+            if isempty(ROIs)
+                fatRenderFibersWholeConnectome(fatDir, sessid{s}, runName{r}, strcat(fgNameBaby,'.mat'), foi,t1_name, hem, outname,color)
+            else
+                fatRenderFibersWholeConnectome(fatDir, sessid{s}, runName{r}, strcat(fgNameBaby,'.mat'), foi,t1_name, hem, outname, color, roiDir, ROIs(h,:))
+            end
+        end
+                
+
+
+
+ 

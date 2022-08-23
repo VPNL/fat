@@ -151,10 +151,8 @@ if (~computed.('brainmask'))
         %     cmd_str=['mrconvert ' files.b0 ' b0.nii.gz']
         %     system(cmd_str);
         %
-%         cmdstr=['bet ' dt_info.files.b0 ' ' dt_info.files.brainMask ' -m']
-        cmdstr=['bet ' dt_info.files.b0 ' ' fullfile(mrtrix_folder,'brain') ' -m']
+        cmdstr=['bet ' dt_info.files.b0 ' ' dt_info.files.brainMask ' -m']
         system(cmdstr)
-        dt_info.files.brainMask = fullfile(mrtrix_folder,'brain_mask.nii.gz')
         % cmd_str = ['bet ' fullfile(anatFolder,t1_name) ' ' fullfile(anatFolder,'brainMask_acpc.nii.gz') ' -m'];
         % [status,results] = AFQ_mrtrix_cmd(cmd_str, 0, 1,mrtrixVersion);
         % cmd_str=['mri_convert ' fullfile(anatFolder,'brainMask_acpc.nii.gz') ' ',...
@@ -191,6 +189,15 @@ if (~computed.('dt'))
     [status,results] = AFQ_mrtrix_cmd(cmd_str, 0, 1,mrtrixVersion);
 end
 
+% to be updated in the fatCreateDT6.m function!!
+files.dki = '/oak/stanford/groups/kalanit/biac2/kgs/projects/bbDWI_development/data/bb02_modular_pipeline/mri6/dwi/run1/dti94trilin/mrtrix/dwi_processed_aligned_trilin_noMEC_dki.mif';
+files.dtWithDki = '/oak/stanford/groups/kalanit/biac2/kgs/projects/bbDWI_development/data/bb02_modular_pipeline/mri6/dwi/run1/dti94trilin/mrtrix/dwi_processed_aligned_trilin_noMEC_dt_dki.mif';
+files.faWithDki = '/oak/stanford/groups/kalanit/biac2/kgs/projects/bbDWI_development/data/bb02_modular_pipeline/mri6/dwi/run1/dti94trilin/mrtrix/dwi_processed_aligned_trilin_noMEC_fa_dki.mif';
+files.md = '/oak/stanford/groups/kalanit/biac2/kgs/projects/bbDWI_development/data/bb02_modular_pipeline/mri6/dwi/run1/dti94trilin/mrtrix/dwi_processed_aligned_trilin_noMEC_md.mif';
+files.mdWithDki = '/oak/stanford/groups/kalanit/biac2/kgs/projects/bbDWI_development/data/bb02_modular_pipeline/mri6/dwi/run1/dti94trilin/mrtrix/dwi_processed_aligned_trilin_noMEC_md_dki.mif';
+files.ad = '/oak/stanford/groups/kalanit/biac2/kgs/projects/bbDWI_development/data/bb02_modular_pipeline/mri6/dwi/run1/dti94trilin/mrtrix/dwi_processed_aligned_trilin_noMEC_ad.mif';
+files.adWithDki = '/oak/stanford/groups/kalanit/biac2/kgs/projects/bbDWI_development/data/bb02_modular_pipeline/mri6/dwi/run1/dti94trilin/mrtrix/dwi_processed_aligned_trilin_noMEC_ad_dki.mif';
+
 if (~computed.('dtWithDki') && multishell>0)
     cmd_str = ['dwi2tensor -dkt ' files.dki ' -grad ' files.b ' ' files.dwi ' ' files.dtWithDki];
     [status,results] = AFQ_mrtrix_cmd(cmd_str, 0, 1,mrtrixVersion);
@@ -198,7 +205,7 @@ end
 
 % Get the FA from the diffusion tensor estimates:
 if (~computed.('fa'))
-    AFQ_mrtrix_tensor2FA(files.dt, ...
+    AFQ_mrtrix_tensor2MD(files.dt, ...
         files.fa, ...
         files.brainmask, ...
         0, ...
@@ -293,7 +300,7 @@ if (compute5tt>0 || multishell>0) && (~computed.('tt5')) && (mrtrixVersion > 2)
     else
         inputFile = fullfile(anatFolder,'aparc+aseg.mgz');
         if ~(exist(inputFile, 'file') == 2)
-              inputFile = fullfile(anatFolder,'asegWithVentricles_reslice.nii.gz');
+              inputFile = fullfile(anatFolder,'asegWithVentricles_edited_acpc.nii.gz');
             if ~(exist(inputFile, 'file') == 2)   
             disp(['inputFile = ' inputFile]);
             error(['Cannot find aseg file, please copy it to ' anatFolder]);

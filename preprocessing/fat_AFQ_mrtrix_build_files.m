@@ -24,12 +24,29 @@ files.brainmask_eroded    = strcat(fname_trunk, '_brainmask_eroded.mif');
 
 % Generate diffusion tensors:
 files.dt = strcat(fname_trunk, '_dt.mif');
+files.dtWithDki = strcat(fname_trunk, '_dt_dki.mif');
+files.dki = strcat(fname_trunk, '_dki.mif');
+
 
 % Get the FA from the diffusion tensor estimates:
 files.fa = strcat(fname_trunk, '_fa.mif');
+files.faWithDki = strcat(fname_trunk, '_fa_dki.mif');
+
+% Get the MD from the diffusion tensor estimates:
+files.md = strcat(fname_trunk, '_md.mif');
+files.mdWithDki = strcat(fname_trunk, '_md_dki.mif');
+
+% Get the AD from the diffusion tensor estimates:
+files.ad = strcat(fname_trunk, '_ad.mif');
+files.adWithDki = strcat(fname_trunk, '_ad_dki.mif');
+
+% Get the RD from the diffusion tensor estimates:
+files.rd = strcat(fname_trunk, '_rd.mif');
+files.rdWithDki = strcat(fname_trunk, '_rd_dki.mif');
 
 % Generate the eigenvectors, weighted by FA:
 files.ev = strcat(fname_trunk, '_ev.mif');
+files.evWithDki = strcat(fname_trunk, '_ev_dki.mif');
 
 % If we have multishell data we will want the FA calculated with the shell
 % closest to b1000
@@ -55,23 +72,49 @@ if compute5tt>0 || multishell>0
     files.tt5 = strcat(fname_trunk, '_5tt.mif');
     files.gmwmi = strcat(fname_trunk, '_5tt_gmwmi.mif');
 end
+% Create per tissue type response file with msmst_5tt
+files.wmResponseMSMT5tt = strcat(fname_trunk, '_msmt_5tt_wmResponse.txt');
+files.gmResponseMSMT5tt = strcat(fname_trunk, '_msmt_5tt_gmResponse.txt');
+files.csfResponseMSMT5tt = strcat(fname_trunk, '_msmt_5tt_csfResponse.txt');
+% Create per tissue type response file with dhollander
+files.wmResponseDhollander = strcat(fname_trunk, '_dhollander_wmResponse.txt');
+files.gmResponseDhollander = strcat(fname_trunk, '_dhollander_gmResponse.txt');
+files.csfResponseDhollander = strcat(fname_trunk, '_dhollander_csfResponse.txt');
+% Create response file with tournier
+files.wmResponseTournier = strcat(fname_trunk, '_tournier_wmResponse.txt');
 
+% Compute the CSD estimates from msmt_5tt:
+files.wmCsdMSMT5tt  = strcat(fname_trunk, '_msmt_5tt_wmCsd.mif');
+files.csfCsdMSMT5tt = strcat(fname_trunk, '_msmt_5tt_csfCsd.mif');
 
-% Create per tissue type response file
-files.wmResponse = strcat(fname_trunk, '_wmResponse.txt');
-files.gmResponse = strcat(fname_trunk, '_gmResponse.txt');
-files.csfResponse = strcat(fname_trunk, '_csfResponse.txt');
-% Compute the CSD estimates:
-files.wmCsd  = strcat(fname_trunk, '_wmCsd_lmax_auto.mif');
+% Compute the CSD estimates from a mixture of dhollander and tournier as in Pietsch et al 2019:
+files.wmCsdMSMTTournier  = strcat(fname_trunk, '_msmt_tournier_wmCsd.mif');
+files.wmCsdMSMTDhollander  = strcat(fname_trunk, '_msmt_dhollander_wmCsd.mif');
+files.csfCsdMSMTTournier = strcat(fname_trunk, '_msmt_dhollander_tournier_csfCsd.mif');
+files.csfCsdMSMTDhollander = strcat(fname_trunk, '_msmt_dhollander_csfCsd.mif');
+files.gmCsdMSMTTournier  = strcat(fname_trunk, '_msmt_tournier_gmCsd.mif');
+files.gmCsdMSMTDhollander  = strcat(fname_trunk, '_msmt_dhollander_gmCsd.mif');
 
-if multishell>0
-    files.gmCsd  = strcat(fname_trunk, '_gmCsd_lmax_auto.mif');
-end
+% Compute the CSD estimates from msmt_5tt:
+files.wmCsdMSMT5ttNorm  = strcat(fname_trunk, '_msmt_5tt_wmCsd_norm.mif');
+files.csfCsdMSMT5ttNorm = strcat(fname_trunk, '_msmt_5tt_csfCsd_norm.mif');
 
-files.csfCsd = strcat(fname_trunk, '_csfCsd_lmax_auto.mif');
+% Compute the CSD estimates from a mixture of dhollander and tournier as in Pietsch et al 2019:
+
+files.wmCsdMSMTDhollanderNorm  = strcat(fname_trunk, '_msmt_dhollander_wmCsd_norm.mif');
+files.csfCsdMSMTDhollanderNorm = strcat(fname_trunk, '_msmt_dhollander_csfCsd_norm.mif');
+
+files.wmCsdMSMTTournierNorm  = strcat(fname_trunk, '_msmt_tournier_wmCsd_norm.mif');
+files.csfCsdMSMTTournierNorm  = strcat(fname_trunk, '_msmt_tournier_csfCsd_norm.mif');
+
 % RGB tissue signal contribution maps
-files.vf = strcat(fname_trunk, '_vf.mif');
+files.vfMSMT5tt = strcat(fname_trunk, '_msmt_5tt_vf.mif');
+files.vfMSMTDhollander = strcat(fname_trunk, '_msmst_dhollander_vf.mif');
+files.vfMSMTTournier = strcat(fname_trunk, '_msmst_tournier_vf.mif');
+
 % dhollander voxel selection for QA
-files.voxels = strcat(fname_trunk, '_voxels.mif');
+files.voxelsMSMT5tt = strcat(fname_trunk, '_voxelsMSMT5tt.mif');
+files.voxelsDhollander = strcat(fname_trunk, '_voxelsDhollander.mif');
+files.voxelsTournier = strcat(fname_trunk, '_voxelsTournier.mif');
 end
 

@@ -1,9 +1,9 @@
-function fgFile=fatCleanConnectomeMRtrix3(fatDir, anatDir, anatid, sessid, runName, fgName, rmOutlier)
+function fgFile=fatCleanConnectomeMRtrix3(fatDir, sessid, runName, fgName, rmOutlier)
 % fatSegmentConnectome(fatDir, sessid, runName, fgName)
 % fgName: full name of fg including path and postfix
 % foi, a vector to indicate fiber of interest
 % This function will run AFQ on a % given list of subjects and runs.
-if nargin < 7, rmOutlier = true; end
+if nargin < 5, rmOutlier = true; end
 
 
 [~,fgNameWoExt] = fileparts(fgName);
@@ -76,7 +76,7 @@ if rmOutlier
     clear fg_classified
     
     % save file
-    pName = sprintf('_cleaner.mat');
+    pName = sprintf('_clean.mat');
     fgFile = fullfile(afqDir, [fgNameWoExt, pName]);
     S.fg =  fg_clean;
     save(fgFile,'-struct','S')

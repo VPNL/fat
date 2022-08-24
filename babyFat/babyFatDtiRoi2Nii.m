@@ -19,7 +19,7 @@ function babyFatDtiRoi2Nii(fatDir, sessid, runName, roiName)
         end   
 
         % use ref image info to convert the acpa coords to img coords
-        img = niftiRead(fullfile(runDir,'mrtrix','b0.nii.gz'),[]);
+        img = niftiRead(fullfile(runDir,'mrtrix','b0.nii.gz'));
         for i = 1:length(roiName)
             roiFile = fullfile(runDir,'babyAFQROIs',roiName{i});
             if exist(roiFile, 'file')

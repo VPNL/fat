@@ -23,7 +23,11 @@ bvecMultiShell = dir('*.bvec*');
 bvecMultiShell = {bvecMultiShell.name};
 
 cd(fullfile(subjDir));
-revPhaseDir=dir('*EPI*');
+revPhaseDir=dir('*pe1');
+if isempty(revPhaseDir)
+    revPhaseDir=dir('*EPI');
+end
+
 cd(revPhaseDir.name)
 niftiRevPhase = dir('*.nii.gz'); % This assumes the niftis dti data folder hasn't been renamed
 niftiRevPhase = {niftiRevPhase.name};

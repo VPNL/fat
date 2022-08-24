@@ -1,10 +1,9 @@
-function fgFile_classified=babyFatSegmentConnectomeMRtrix3(fatDir, ROIdir, sessid, runName, fgName, computeRoi,anatFile)
+function fgFile_classified=babyFatSegmentConnectomeMRtrix3(fatDir, ROIdir,...
+    sessid, runName, fgName, computeRoi,anatFile,asegFile)
 % fatSegmentConnectome(fatDir, sessid, runName, fgName)
 % fgName: full name of fg including path and postfix
 % foi, a vector to indicate fiber of interest
 % This function will run AFQ on a % given list of subjects and runs.
-if nargin < 7, computeRoi = true; end
-if nargin < 6, fgName = 'lmax_curv1_post_life_et_it500.mat'; end
 
 if computeRoi
     useRoiBasedApproach = true;
@@ -42,55 +41,56 @@ fg.classifiedWithBabyAFQIndex=classification.index;
 fg.classifiedWithBabyAFQNames=classification.names;
 clear wholebrainFG
 
-            %prepare VOF ROI
-            babyFatDtiRoi2Nii(fatDir, sessid, runName, [])
-            cmd_str=['mri_convert ' fullfile(ROIdir,'VOF_box_L.nii.gz') ' ',...
-                fullfile(ROIdir,'VOF_box_L_resliced.nii.gz') ' --reslice_like ',...
-                fullfile(fatDir, sessid, runName,'t1', 'asegWithVentricles_edited_acpc.nii.gz')];
-            system(cmd_str);
-            
-            cmd_str=['mri_convert ' fullfile(ROIdir,'VOF_box_R.nii.gz') ' ',...
-                fullfile(ROIdir,'VOF_box_R_resliced.nii.gz') ' --reslice_like ',...
-                fullfile(fatDir, sessid, runName,'t1', 'asegWithVentricles_edited_acpc.nii.gz')];
-            system(cmd_str);
-            
-            cmdstr=['5tt2gmwmi -mask_in ' fullfile(ROIdir,'VOF_box_L_resliced.nii.gz') ' ',...
-                fullfile(runDir, 'mrtrix', 'dwi_processed_aligned_trilin_noMEC_5tt.mif') ' ',...
-                fullfile(ROIdir,'VOF_gmwmi_L.nii.gz') ' -force'];
-            system(cmdstr);
-            
-            cmdstr=['5tt2gmwmi -mask_in ' fullfile(ROIdir,'VOF_box_R_resliced.nii.gz') ' ',...
-                fullfile(runDir, 'mrtrix', 'dwi_processed_aligned_trilin_noMEC_5tt.mif') ' ',...
-                fullfile(ROIdir,'VOF_gmwmi_R.nii.gz') ' -force'];
-            system(cmdstr);
-            
-            img=niftiRead(fullfile(ROIdir,'VOF_gmwmi_L.nii.gz'));
-            load(fullfile(ROIdir,'VOF_box_L.mat'));
-            
-            imgCoords = find(ceil(img.data));
-            [I,J,K] = ind2sub(img.dim, imgCoords);
-            roi.coords  = mrAnatXformCoords(img.qto_xyz, [I,J,K]);
-            
-            outname='VOF_gmwmi_L.mat';
-            save(fullfile(ROIdir,outname),'roi','versionNum','coordinateSpace');
-            
-            img=niftiRead(fullfile(ROIdir,'VOF_gmwmi_R.nii.gz'));
-            load(fullfile(ROIdir,'VOF_box_R.mat'));
-            
-            imgCoords = find(ceil(img.data));
-            [I,J,K] = ind2sub(img.dim, imgCoords);
-            roi.coords  = mrAnatXformCoords(img.qto_xyz, [I,J,K]);
+%prepare VOF ROI
+%%
+babyFatDtiRoi2Nii(fatDir, sessid, runName,[])
+cmd_str=['mri_convert ' fullfile(ROIdir,'VOF_box_L.nii.gz') ' ',...
+    fullfile(ROIdir,'VOF_box_L_resliced.nii.gz') ' --reslice_like ',...
+    fullfile(fatDir, sessid, runName,'t1', asegFile)];
+system(cmd_str);
 
-            outname='VOF_gmwmi_R.mat';
-            save(fullfile(ROIdir,outname),'roi','versionNum','coordinateSpace');
-            
+cmd_str=['mri_convert ' fullfile(ROIdir,'VOF_box_R.nii.gz') ' ',...
+    fullfile(ROIdir,'VOF_box_R_resliced.nii.gz') ' --reslice_like ',...
+    fullfile(fatDir, sessid, runName,'t1', asegFile)];
+system(cmd_str);
+
+cmdstr=['5tt2gmwmi -mask_in ' fullfile(ROIdir,'VOF_box_L_resliced.nii.gz') ' ',...
+    fullfile(runDir, 'mrtrix', 'dwi_processed_aligned_trilin_noMEC_5tt.mif') ' ',...
+    fullfile(ROIdir,'VOF_gmwmi_L.nii.gz') ' -force'];
+[status,results] = AFQ_mrtrix_cmd(cmdstr, 0, 1,3);
+
+cmdstr=['5tt2gmwmi -mask_in ' fullfile(ROIdir,'VOF_box_R_resliced.nii.gz') ' ',...
+    fullfile(runDir, 'mrtrix', 'dwi_processed_aligned_trilin_noMEC_5tt.mif') ' ',...
+    fullfile(ROIdir,'VOF_gmwmi_R.nii.gz') ' -force'];
+[status,results] = AFQ_mrtrix_cmd(cmdstr, 0, 1,3);
+
+img=niftiRead(fullfile(ROIdir,'VOF_gmwmi_L.nii.gz'));
+load(fullfile(ROIdir,'VOF_box_L.mat'));
+
+imgCoords = find(ceil(img.data));
+[I,J,K] = ind2sub(img.dim, imgCoords);
+roi.coords  = mrAnatXformCoords(img.qto_xyz, [I,J,K]);
+
+outname='VOF_gmwmi_L.mat';
+save(fullfile(ROIdir,outname),'roi','versionNum','coordinateSpace');
+
+img=niftiRead(fullfile(ROIdir,'VOF_gmwmi_R.nii.gz'));
+load(fullfile(ROIdir,'VOF_box_R.mat'));
+
+imgCoords = find(ceil(img.data));
+[I,J,K] = ind2sub(img.dim, imgCoords);
+roi.coords  = mrAnatXformCoords(img.qto_xyz, [I,J,K]);
+
+outname='VOF_gmwmi_R.mat';
+save(fullfile(ROIdir,outname),'roi','versionNum','coordinateSpace');
+
 fg_classified = fg2Array(fg_classified);
-% 
-% 
+%
+%
 % %% Identify VOF and pAF
 
-[L_VOF, R_VOF, L_pAF, R_pAF, L_pAF_vot, R_pAF_vot] = babyFAT_AFQ_FindVOF(wholeBrainfgFile,...
-   fg_classified(19),fg_classified(20),ROIdir,afqDir,[],[],dt);
+[L_VOF, R_VOF, L_pAF, R_pAF, L_pAF_vot, R_pAF_vot] = babyAFQ_FindVOF(wholeBrainfgFile,...
+    fg_classified(19),fg_classified(20),ROIdir,afqDir,[],[],dt);
 
 
 fg_classified(23) = L_VOF;
@@ -172,12 +172,12 @@ fgFile_classified = fullfile(afqDir, [fgNameWoExt, '_classified_withBabyAFQ.mat'
 S.fg = fg_classified;
 save(fgFile_classified,'-struct','S');
 
-% % save unclassified fibers 
+% % save unclassified fibers
 fgFile_unclassified = fullfile(afqDir, [fgNameWoExt,'_unclassified_withBabyAFQ.mat']);
 S.fg = fg_unclassified;
 save(fgFile_unclassified,'-struct','S');
 
-% % save unclassified fibers 
+% % save unclassified fibers
 fgFile = (fullfile(afqDir, [fgNameWoExt,'_allFibers_babyAFQ.mat']));
 S.fg = fg;
 save(fgFile,'-struct','S');

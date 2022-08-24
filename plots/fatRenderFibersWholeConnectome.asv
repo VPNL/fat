@@ -1,5 +1,5 @@
 function  fatRenderFibersWholeConnectome(fatDir, sessid, runName, fgName,foi,...
-    t1name,hemi,outname,colorMap,ROIFolder,ROIs,numfibers)
+    t1name,hemi,numfibers,colorMap,ROIFolder,ROIs)
 %  fatRenderFibers(fatDir, sessid, runName, fgName, hemi)
 % fgName: full name of fg including path and postfix
 % foi, a vector to indicate fiber of interest
@@ -19,7 +19,7 @@ else strcmp(hemi,'rh')
 end
 zplane = [0, 0, -10];
 
-if nargin < 12
+if nargin < 8 
      numfibers = 50;
 end 
 
@@ -74,9 +74,9 @@ maxDist = 4; maxLen = 4;numNodes = 100;M = 'mean';maxIter = 200;count = false;
                     'color',colorMap(I(j),:),'newfig',false)
             end
 
-            if exist('ROIs','var')~=0
+            if exist('ROIs')~=0
                 for r = 1:length(ROIs)
-                    ROI=load(fullfile(runDir,ROIFolder,ROIs{r}))
+                    ROI=load(fullfile(runDir,subdir.name,ROIFolder,ROIs{r}))
                     AFQ_RenderRoi(ROI.roi,[1 0 0],'mesh','surface')
                     % h = AFQ_RenderRoi(roi, color , [method = 'trimesh'], [render = 'surface'])
                 end
@@ -90,7 +90,7 @@ maxDist = 4; maxLen = 4;numNodes = 100;M = 'mean';maxIter = 200;count = false;
             clear fg roifg
             
        %     print('-depsc',fullfile(imgDir,sprintf('%s.eps',fName)));
-            print('-dtiff','-r300',fullfile(imgDir,sprintf('%s.tiff',outname)));
+            print('-dtiff','-r300',fullfile(imgDir,sprintf('%s.tiff',strcat(hemi,'_',fName))));
             end
            % close all;
 end

@@ -4,7 +4,8 @@ function files = babyFat_AFQ_mrtrixInit(dt6, ...
     multishell, ...
     tool, ...
     compute5tt, ...
-    anatFolder,t1_name)
+    anatFolder, ...
+    aseg_file_name)
 
 % function files = AFQ_mrtrixInit(dt6, lmax, mrtrix_folder)
 %
@@ -81,10 +82,12 @@ dt_info = load(dt6);
 
 
 % Strip the file names out of the dt6 strings.
-if isfield(dt_info, 'files') && isfield(dt_info.files, 'alignedDwRaw') && exist(dt_info.files.alignedDwRaw,'file')
+if isfield(dt_info, 'files') && isfield(dt_info.files, 'alignedDwRaw') ...
+        && exist(dt_info.files.alignedDwRaw,'file')
     dwRawFile = dt_info.files.alignedDwRaw;
 else
-    dwRawFile = fullfile(dt_info.params.rawDataDir, strcat(dt_info.params.rawDataFile,'.gz'));
+    dwRawFile = fullfile(dt_info.params.rawDataDir,...
+        strcat(dt_info.params.rawDataFile,'.gz'));
 end
 
 % This line removes the extension of the file (.nii.gz) and mainaints de path
@@ -128,8 +131,6 @@ end
 
 % This file contains both bvecs and bvals, as per convention of mrtrix
 if (~computed.('b'))
-    %bvecs = fullfile(dt_info.params.rawDataDir, strcat(fnameDwRawFile, '.bvecs'));
-    %bvals = fullfile(dt_info.params.rawDataDir, strcat(fnameDwRawFile, '.bvals'));
     bvecs = dt_info.files.alignedDwBvecs;
     bvals = dt_info.files.alignedDwBvals;
     mrtrix_bfileFromBvecs(bvecs, bvals, files.b);
@@ -137,46 +138,37 @@ end
 
 % Create the b0: do it always, so pass multishell variable as false
 if (~computed.('b0'))
-fat_AFQ_mrtrix_extract(files,multishell,0,0,mrtrixVersion);
-  cmd_str=['mrconvert ' fullfile(files.b0) ' ' fullfile(dt_info.files.b0)];
-  [status,results] = AFQ_mrtrix_cmd(cmd_str,0,1,mrtrixVersion);    
+    fat_AFQ_mrtrix_extract(files,multishell,0,0,mrtrixVersion);
+    cmd_str=['mrconvert ' fullfile(files.b0) ' ' fullfile(dt_info.files.b0)];
+    [status,results] = AFQ_mrtrix_cmd(cmd_str,0,1,mrtrixVersion);
 end
 
 % Create a brain mask:
 if (~computed.('brainmask'))
-    cmd_str = ['dwi2mask ' files.dwi ' ' files.brainmask ' -grad ' files.b ' -force -quiet'];
-    [status,results] = AFQ_mrtrix_cmd(cmd_str, 0, 1,mrtrixVersion);
-            
     if multishell>0
-        %     cmd_str=['mrconvert ' files.b0 ' b0.nii.gz']
-        %     system(cmd_str);
-        %
-%         cmdstr=['bet ' dt_info.files.b0 ' ' dt_info.files.brainMask ' -m']
-        cmdstr=['bet ' dt_info.files.b0 ' ' fullfile(mrtrix_folder,'brain') ' -m']
-        system(cmdstr)
-        dt_info.files.brainMask = fullfile(mrtrix_folder,'brain_mask.nii.gz')
-        % cmd_str = ['bet ' fullfile(anatFolder,t1_name) ' ' fullfile(anatFolder,'brainMask_acpc.nii.gz') ' -m'];
-        % [status,results] = AFQ_mrtrix_cmd(cmd_str, 0, 1,mrtrixVersion);
-        % cmd_str=['mri_convert ' fullfile(anatFolder,'brainMask_acpc.nii.gz') ' ',...
-        %     fullfile(dt_info.files.brainMask) ' --reslice_like ',...
-        %     fullfile(dt_info.files.b0)];
-        % system(cmd_str);
 
-        cmd_str=['mrconvert ' fullfile(dt_info.files.brainMask) ' ' files.brainmask ' -force']
+        cmdstr=['bet ' dt_info.files.b0 ' ' fullfile(mrtrix_folder,'brain') ' -m'];
+        system(cmdstr)
+        cmdstr=['mv ' fullfile(mrtrix_folder,'brain_mask.nii.gz') ' ' fullfile(mrtrix_folder,'brainMask.nii.gz')];
+        dt_info.files.brainMask = fullfile(mrtrix_folder,'brainMask.nii.gz');
+
+        cmd_str=['mrconvert ' fullfile(dt_info.files.brainMask) ' ' files.brainmask ' -force'];
         [status,results] = AFQ_mrtrix_cmd(cmd_str, 0, 1,mrtrixVersion);
+
+    else
+        cmd_str = ['dwi2mask ' files.dwi ' ' files.brainmask ' -grad ' files.b ' -force -quiet'];
+        [status,results] = AFQ_mrtrix_cmd(cmd_str, 0, 1,mrtrixVersion);
+
     end
-      
-% cmd_str=['mrconvert ' fullfile(files.brainmask) ' ' fullfile(dt_info.files.brainMask)];
-% system(cmd_str);  
-%  
 end
+
 
 % Dilate and erode the brainmask
 if (~computed.('brainmask_dilated'))  || (~computed.('brainmask_eroded'))
-  brainMaskFile = fullfile(session, dt_info.files.brainMask); 
-  fat_AFQ_mrtrix_maskfilter(files, ...
-                        false, ...
-                        mrtrixVersion)
+    brainMaskFile = fullfile(session, dt_info.files.brainMask);
+    fat_AFQ_mrtrix_maskfilter(files, ...
+        false, ...
+        mrtrixVersion)
 end
 
 % Generate diffusion tensors:
@@ -186,7 +178,7 @@ if (~computed.('dt'))
         0, ...
         0, ...
         mrtrixVersion);
-    
+
     cmd_str = ['mrconvert ' files.dt ' ' dt_info.files.tensors ' -force -quiet'];
     [status,results] = AFQ_mrtrix_cmd(cmd_str, 0, 1,mrtrixVersion);
 end
@@ -203,7 +195,7 @@ if (~computed.('fa'))
         files.brainmask, ...
         0, ...
         mrtrixVersion);
-    
+
     cmd_str = ['mrconvert ' files.fa ' ' dt_info.files.fa ' -force -quiet'];
     [status,results] = AFQ_mrtrix_cmd(cmd_str, 0, 1,mrtrixVersion);
 end
@@ -293,16 +285,16 @@ if (compute5tt>0 || multishell>0) && (~computed.('tt5')) && (mrtrixVersion > 2)
     else
         inputFile = fullfile(anatFolder,'aparc+aseg.mgz');
         if ~(exist(inputFile, 'file') == 2)
-              inputFile = fullfile(anatFolder,'asegWithVentricles_reslice.nii.gz');
-            if ~(exist(inputFile, 'file') == 2)   
-            disp(['inputFile = ' inputFile]);
-            error(['Cannot find aseg file, please copy it to ' anatFolder]);
+            inputFile = fullfile(anatFolder,aseg_file_name);
+            if ~(exist(inputFile, 'file') == 2)
+                disp(['inputFile = ' inputFile]);
+                error(['Cannot find aseg file, please copy it to ' anatFolder]);
             end
         end
     end
-    
+
     % TODO: update directory structure to point to FS files.
-    
+
     AFQ_mrtrix_5ttgen(inputFile, ...
         files.tt5, ...
         0, ...
@@ -314,13 +306,13 @@ end
 % Create a white-matter mask
 if (~computed.('wmMask')) || (~computed.('wmMask_dilated'))
     fat_AFQ_mrtrix_5ttwm(files.tt5, ...
-                      files.fa, ...
-                      faMaskThresh, ...
-                      files.brainmask_eroded, ...
-                      files.wmMask, ...
-                      files.wmMask_dilated, ...
-                      false, ...
-                      mrtrixVersion)
+        files.fa, ...
+        faMaskThresh, ...
+        files.brainmask_eroded, ...
+        files.wmMask, ...
+        files.wmMask_dilated, ...
+        false, ...
+        mrtrixVersion)
 
 end
 
@@ -333,44 +325,44 @@ end
 %         [], ...
 %         0, ...
 %         mrtrixVersion)
-%     
+%
 %      cmd_str = ['maskfilter ' files.wmMask ' dilate ' files.wmMask_dilated ' -force -quiet'];
 %     [status,results] = AFQ_mrtrix_cmd(cmd_str, 0, 1,mrtrixVersion);
-%        
+%
 %end
 
 
 if multishell==0
-    
-%    Estimate the response function of single shell. The mrtrix people
-%    recommend pretending that one has mutsishell data, and still using
-%    dhollander and msmt_csd. This is what I implemented here.
+
+    %    Estimate the response function of single shell. The mrtrix people
+    %    recommend pretending that one has mutsishell data, and still using
+    %    dhollander and msmt_csd. This is what I implemented here.
     if (~computed.('wmResponse'))
-cmd_str = ['dwi2response dhollander -force ' ...
-                          files.dwi ' ' ...
-                          files.wmResponse  ' ' ...
-                          files.gmResponse  ' ' ...
-                          files.csfResponse ' ' ...
-                          '-grad ' files.b  ' ' ...
-                          '-voxels ' files.voxels];
-   [status,results] = AFQ_mrtrix_cmd(cmd_str, 0, 1, mrtrixVersion);
+        cmd_str = ['dwi2response dhollander -force ' ...
+            files.dwi ' ' ...
+            files.wmResponse  ' ' ...
+            files.gmResponse  ' ' ...
+            files.csfResponse ' ' ...
+            '-grad ' files.b  ' ' ...
+            '-voxels ' files.voxels];
+        [status,results] = AFQ_mrtrix_cmd(cmd_str, 0, 1, mrtrixVersion);
     end
-    
+
     % Compute the CSD estimates:
     if (~computed.('wmCsd'))
         disp('The following step takes a while (a few hours)');
         cmd_str = ['dwi2fod msmt_csd ' ...
-                     files.dwi ' ' ...
-                     files.wmResponse  ' '  files.wmCsd ' '  ...
-                     files.csfResponse ' '  files.csfCsd ' '  ...
-                     '-mask ' files.wmMask_dilated ' ' ...
-                     '-grad ' files.b ' ' ...
-                     '-force'];                              
-   [status,results] = AFQ_mrtrix_cmd(cmd_str, 0, 1, mrtrixVersion);
+            files.dwi ' ' ...
+            files.wmResponse  ' '  files.wmCsd ' '  ...
+            files.csfResponse ' '  files.csfCsd ' '  ...
+            '-mask ' files.wmMask_dilated ' ' ...
+            '-grad ' files.b ' ' ...
+            '-force'];
+        [status,results] = AFQ_mrtrix_cmd(cmd_str, 0, 1, mrtrixVersion);
     end
-    
+
 else
-    
+
     % Create per tissue response function estimation
     if (~computed.('wmResponseDhollander'))
         cmd_str = ['dwi2response dhollander -force ' ...
@@ -384,10 +376,10 @@ else
             '-fa 0.1'];
         [status,results] = AFQ_mrtrix_cmd(cmd_str, 0, 1, mrtrixVersion);
     end
-    
-    
+
+
     % Compute the CSD estimates:
-        if (~computed.('wmCsdMSMTDhollander'))   && (mrtrixVersion > 2)
+    if (~computed.('wmCsdMSMTDhollander'))   && (mrtrixVersion > 2)
         cmd_str = ['dwi2fod msmt_csd ' ...
             files.dwi ' ' ...
             files.wmResponseDhollander  ' '  files.wmCsdMSMTDhollander ' '  ...
@@ -395,25 +387,25 @@ else
             '-mask ' files.brainmask ' ' ...
             '-grad ' files.b ' ' ...
             '-force'];
-        
+
         [status,results] = AFQ_mrtrix_cmd(cmd_str, 0, 1,mrtrixVersion);
-        end
-    
-            if (~computed.('wmCsdMSMTDhollanderNorm'))  && (mrtrixVersion > 2)
+    end
+
+    if (~computed.('wmCsdMSMTDhollanderNorm'))  && (mrtrixVersion > 2)
         % mrconvert -coord 3 0 wm.mif - | mrcat csf.mif gm.mif - vf.mif
         cmd_str = ['mtnormalise ' files.wmCsdMSMTDhollander ' ' files.wmCsdMSMTDhollanderNorm ' ',...
             ' ' files.csfCsdMSMTDhollander ' ' files.csfCsdMSMTDhollanderNorm ' -mask ' files.brainmask ' '];
         AFQ_mrtrix_cmd(cmd_str, 0, 0,mrtrixVersion);
-            end
-    
-          % RGB tissue signal contribution maps
+    end
+
+    % RGB tissue signal contribution maps
     if (~computed.('vfMSMTDhollander'))  && (mrtrixVersion > 2)
         % mrconvert -coord 3 0 wm.mif - | mrcat csf.mif gm.mif - vf.mif
         cmd_str = ['mrconvert -force -coord 3 0 ' files.wmCsdMSMTDhollanderNorm ' - | ' ...
             'mrcat -force ' files.csfCsdMSMTDhollanderNorm ' - ' files.vfMSMTDhollander];
         AFQ_mrtrix_cmd(cmd_str, 0, 0,mrtrixVersion);
     end
-    
+
 end
 
 
